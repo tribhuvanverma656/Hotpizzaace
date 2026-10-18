@@ -37,9 +37,10 @@ import {
 } from '@/lib/checkout-draft';
 import { getCustomerAddresses, getDefaultCustomerAddress } from '@/lib/customer-addresses';
 import { money } from '@/lib/utils';
-import { Customer, Fulfillment, PaymentStatus, SavedAddress } from '@/types';
+import { Customer, Fulfillment, Order, PaymentStatus, SavedAddress } from '@/types';
 import { OrderSummary } from '@/components/order-summary';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { openRazorpayCheckout } from '@/lib/razorpay-checkout';
 import '@/components/checkout-ux.css';
 function draftStorage() {
   try {
@@ -259,7 +260,7 @@ function CheckoutForm() {
       selectedAddressSnapshot: saved ?? null,
     });
   };
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (submitting.current || busy || !checkoutIsCurrent()) return;
     submitting.current = true;
@@ -309,18 +310,124 @@ function CheckoutForm() {
       const order = createOrder({ ...validated, idempotencyKey: nextAttempt.key });
       saveAttempt({ ...nextAttempt, orderId: order.id });
       if (isCompletedCheckout(order)) {
+        fetch('/api/orders', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(order),
+        }).catch(() => {});
         finishDraft();
         router.push(`/order-success?id=${order.id}`);
         return;
       }
-      setPaymentOrderId(order.id);
       setRetryReady(false);
+      await startRazorpayPayment(order);
     } catch (err) {
       setError(
         err instanceof Error ? err.message : 'Unable to continue. Please check your details.',
       );
     } finally {
       submitting.current = false;
+    }
+  };
+  const startRazorpayPayment = async (targetOrder: Order) => {
+    if (!checkoutIsCurrent()) return;
+    setBusy(true);
+    setPaymentError('');
+    try {
+      fetch('/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(targetOrder),
+      }).catch(() => {});
+
+      const res = await fetch('/api/payment/razorpay', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          orderId: targetOrder.id,
+          amount: targetOrder.total,
+          receipt: targetOrder.number,
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error('Payment gateway initialization failed.');
+      }
+
+      const data = await res.json();
+
+      if (data.mock || !data.keyId) {
+        if (checkoutIsCurrent()) {
+          setPaymentOrderId(targetOrder.id);
+          setBusy(false);
+        }
+        return;
+      }
+
+      await openRazorpayCheckout({
+        keyId: data.keyId,
+        amount: data.amount,
+        orderId: data.orderId,
+        appOrderId: targetOrder.id,
+        customerName: targetOrder.customer.name,
+        customerPhone: targetOrder.customer.phone,
+        onSuccess: async (rzpResponse) => {
+          if (!checkoutIsCurrent()) return;
+          setBusy(true);
+          try {
+            const verifyRes = await fetch('/api/payment/verify', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                orderId: targetOrder.id,
+                ...rzpResponse,
+              }),
+            });
+            const verifyData = await verifyRes.json();
+            if (!verifyRes.ok || !verifyData.success) {
+              throw new Error(verifyData.error || 'Payment signature verification failed.');
+            }
+
+            updatePaymentStatus(targetOrder.id, 'simulated_paid');
+            updateOrderStatus(targetOrder.id, 'confirmed');
+            finishDraft();
+            toast.success('Payment verified successfully! Order placed.');
+            router.push(`/order-success?id=${targetOrder.id}`);
+          } catch (verErr: unknown) {
+            const message = verErr instanceof Error ? verErr.message : 'Payment verification failed';
+            setPaymentError(message);
+            updatePaymentStatus(targetOrder.id, 'failed');
+            setPaymentOrderId(targetOrder.id);
+          } finally {
+            if (checkoutIsCurrent()) setBusy(false);
+          }
+        },
+        onDismiss: () => {
+          if (checkoutIsCurrent()) {
+            setBusy(false);
+            setPaymentOrderId(targetOrder.id);
+            toast.info('Payment window closed.');
+          }
+        },
+        onError: (err: unknown) => {
+          if (checkoutIsCurrent()) {
+            setBusy(false);
+            const message =
+              typeof err === 'object' && err !== null && 'description' in err
+                ? String((err as { description?: unknown }).description)
+                : err instanceof Error
+                  ? err.message
+                  : 'Payment failed';
+            setPaymentError(message);
+            setPaymentOrderId(targetOrder.id);
+          }
+        },
+      });
+    } catch {
+      if (checkoutIsCurrent()) {
+        setBusy(false);
+        setPaymentOrderId(targetOrder.id);
+      }
     }
   };
   const simulate = async (success: boolean) => {
@@ -973,7 +1080,15 @@ function CheckoutForm() {
             </>
           ) : (
             <div className="simulation-actions">
-              <button type="button" className="btn btn-primary" onClick={() => simulate(true)}>
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={() => paymentOrder && startRazorpayPayment(paymentOrder)}
+              >
+                <CreditCard size={18} />
+                Pay with Razorpay (UPI / Card)
+              </button>
+              <button type="button" className="btn btn-outline" onClick={() => simulate(true)}>
                 <CheckCircle2 size={18} />
                 Simulate successful payment
               </button>
@@ -987,7 +1102,7 @@ function CheckoutForm() {
               </button>
             </div>
           )}
-          <small className="muted">This simulator does not connect to Razorpay or any bank.</small>
+          <small className="muted">Use Razorpay for real/test payments, or use the simulator for instant local testing.</small>
         </DialogContent>
       </Dialog>
     </div>
