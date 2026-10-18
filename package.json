@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --hostname 0.0.0.0",
+    "dev": "next dev --webpack --hostname 0.0.0.0",
     "build": "next build --webpack",
     "start": "next start --hostname 0.0.0.0",
     "lint": "eslint .",
@@ -12,10 +12,14 @@
     "format": "prettier --write ."
   },
   "dependencies": {
+    "@next/swc-darwin-arm64": "^16.4.2",
+    "@next/swc-wasm-nodejs": "^16.4.2",
     "@radix-ui/react-dialog": "^1.1.15",
     "@supabase/supabase-js": "^2.118.0",
+    "@unrs/resolver-binding-darwin-arm64": "^1.12.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "lightningcss-darwin-arm64": "^1.33.0",
     "lucide-react": "^0.468.0",
     "next": "^16.0.0",
     "razorpay": "^2.9.8",
