@@ -12,6 +12,9 @@
     "format": "prettier --write ."
   },
   "dependencies": {
+    "@capacitor/android": "^8.5.3",
+    "@capacitor/cli": "^8.5.3",
+    "@capacitor/core": "^8.5.3",
     "@next/swc-darwin-arm64": "^16.4.2",
     "@next/swc-wasm-nodejs": "^16.4.2",
     "@radix-ui/react-dialog": "^1.1.15",
