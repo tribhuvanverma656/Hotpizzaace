@@ -15,7 +15,6 @@
     "@capacitor/android": "^8.5.3",
     "@capacitor/cli": "^8.5.3",
     "@capacitor/core": "^8.5.3",
-    "@next/swc-darwin-arm64": "^16.4.2",
     "@next/swc-wasm-nodejs": "^16.4.2",
     "@radix-ui/react-dialog": "^1.1.15",
     "@supabase/supabase-js": "^2.118.0",
@@ -25,6 +24,7 @@
     "lightningcss-darwin-arm64": "^1.33.0",
     "lucide-react": "^0.468.0",
     "next": "^16.0.0",
+    "paytmchecksum": "^1.5.1",
     "razorpay": "^2.9.8",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
@@ -44,5 +44,9 @@
     "tailwindcss": "^4.1.0",
     "tsx": "^4.20.0",
     "typescript": "^5.9.0"
+  },
+  "optionalDependencies": {
+    "@next/swc-darwin-arm64": "^16.4.2",
+    "@next/swc-linux-x64-gnu": "^16.4.2"
   }
 }
