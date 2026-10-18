@@ -1,0 +1,368 @@
+button.branch-picker-trigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 220px;
+  padding: 7px 9px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: #716b5d;
+  text-align: left;
+  cursor: pointer;
+}
+
+button.branch-picker-trigger:hover {
+  border-color: #e4dccd;
+  background: #faf6ee;
+}
+
+button.branch-picker-trigger > svg {
+  flex-shrink: 0;
+  color: #b95335;
+}
+
+button.branch-picker-trigger > span {
+  min-width: 0;
+}
+
+button.branch-picker-trigger small {
+  display: block;
+  margin-bottom: 2px;
+  font-size: 9px;
+  line-height: 1.4;
+}
+
+button.branch-picker-trigger strong {
+  display: block;
+  overflow: hidden;
+  color: #39382e;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.5;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dialog-content.branch-picker-dialog {
+  width: min(600px, calc(100% - 30px));
+  padding: 30px;
+  border: 1px solid #e8e2d7;
+  background: #fffdf8;
+  color: #38372d;
+}
+
+.branch-picker-dialog .branch-picker-eyebrow {
+  display: block;
+  margin-bottom: 11px;
+  color: #9b8062;
+  font-size: 10px;
+  font-weight: 650;
+  letter-spacing: 1.8px;
+}
+
+.branch-picker-dialog .branch-picker-title {
+  padding-right: 20px;
+  font-size: 29px;
+  font-weight: 550;
+  letter-spacing: -0.8px;
+  line-height: 1.3;
+}
+
+.branch-picker-dialog .branch-picker-description {
+  margin-top: 10px;
+  color: #81796a;
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.branch-picker-dialog .branch-picker-pin-form {
+  margin: 22px 0;
+}
+
+.branch-picker-dialog .branch-picker-pin-form > label {
+  display: block;
+  margin-bottom: 8px;
+  color: #615d50;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.branch-picker-dialog .branch-picker-pin-entry {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 49px;
+  padding: 5px 6px 5px 14px;
+  border: 1px solid #ded7c8;
+  border-radius: 9px;
+  background: #fff;
+}
+
+.branch-picker-dialog .branch-picker-pin-entry > svg {
+  flex-shrink: 0;
+  color: #998d76;
+}
+
+.branch-picker-dialog .branch-picker-pin-entry > input {
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+  padding: 5px 0;
+  border: 0;
+  background: transparent;
+  color: #34352d;
+  font-size: 15px;
+  letter-spacing: 0.5px;
+}
+
+.branch-picker-dialog .branch-picker-pin-entry:focus-within {
+  border-color: #b58b66;
+  box-shadow: 0 0 0 2px #b58b6617;
+}
+
+.branch-picker-dialog .branch-picker-pin-entry > button {
+  min-height: 36px;
+  padding: 8px 16px;
+  border: 0;
+  border-radius: 6px;
+  background: #f4eadd;
+  color: #a34e31;
+  font-size: 12px;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.branch-picker-dialog .branch-picker-text-button {
+  display: inline-block;
+  margin-top: 9px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #a85034;
+  font-size: 12px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.branch-picker-dialog .branch-picker-coverage {
+  margin: 0 0 19px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  background: #f1f3e8;
+  color: #67744b;
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.branch-picker-dialog .branch-picker-coverage > p {
+  margin: 0;
+}
+
+.branch-picker-dialog .branch-picker-list {
+  display: grid;
+  gap: 15px;
+}
+
+.branch-picker-dialog .branch-picker-card {
+  padding: 21px;
+  border: 1px solid #e2ddcf;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.branch-picker-dialog .branch-picker-card-selected {
+  border-color: #abb98e;
+  box-shadow: 0 0 0 1px #abb98e26;
+}
+
+.branch-picker-dialog .branch-picker-card-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.branch-picker-dialog .branch-picker-card-heading > h3 {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.branch-picker-dialog .branch-picker-selected-badge {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 4px;
+  color: #64804d;
+  font-size: 10px;
+}
+
+.branch-picker-dialog .branch-picker-availability {
+  display: inline-block;
+  margin-top: 8px;
+  color: #66804d;
+  font-size: 11px;
+}
+
+.branch-picker-dialog .branch-picker-unavailable {
+  color: #a06f41;
+}
+
+.branch-picker-dialog .branch-picker-address,
+.branch-picker-dialog .branch-picker-contact {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  margin: 14px 0 0;
+  color: #797363;
+  font-size: 12px;
+  line-height: 1.8;
+  text-decoration: none;
+}
+
+.branch-picker-dialog .branch-picker-address > svg,
+.branch-picker-dialog .branch-picker-contact > svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: #b0926e;
+}
+
+.branch-picker-dialog a.branch-picker-contact:hover {
+  color: #ab5134;
+}
+
+.branch-picker-dialog .branch-picker-services {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.branch-picker-dialog .branch-picker-services > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px;
+  border-radius: 5px;
+  background: #f6f5ee;
+  color: #81745f;
+  font-size: 10px;
+}
+
+.branch-picker-dialog .branch-picker-select {
+  width: 100%;
+  min-height: 43px;
+  margin-top: 19px;
+  border-radius: 7px;
+  font-size: 12px;
+}
+
+.branch-picker-dialog .branch-picker-footer-note {
+  margin-top: 18px;
+  color: #9b9488;
+  font-size: 11px;
+  line-height: 1.7;
+}
+
+.branch-picker-dialog .branch-picker-error {
+  margin-top: 10px;
+  color: #ad4a32;
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.branch-picker-dialog .branch-picker-dialog-icon {
+  display: grid;
+  place-items: center;
+  width: 47px;
+  height: 47px;
+  margin-bottom: 18px;
+  border-radius: 11px;
+  background: #f6e9d8;
+  color: #aa613a;
+}
+
+.branch-picker-dialog .branch-picker-confirm-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 20px;
+  padding: 14px;
+  border-radius: 9px;
+  background: #f7f3e9;
+  color: #82735d;
+  font-size: 12px;
+  line-height: 1.8;
+}
+
+.branch-picker-dialog .branch-picker-confirm-note > svg {
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+
+.branch-picker-dialog .branch-picker-confirm-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.branch-picker-dialog .branch-picker-confirm-actions > button {
+  min-height: 45px;
+  font-size: 12px;
+}
+
+button.branch-picker-trigger:focus-visible,
+.branch-picker-dialog button:focus-visible,
+.branch-picker-dialog a:focus-visible {
+  outline: 2px solid #b58b66;
+  outline-offset: 3px;
+}
+
+@media (max-width: 640px) {
+  button.branch-picker-trigger {
+    gap: 6px;
+    max-width: 190px;
+    padding: 5px 6px;
+  }
+
+  button.branch-picker-trigger small {
+    font-size: 8px;
+  }
+
+  button.branch-picker-trigger strong {
+    font-size: 11px;
+  }
+
+  .dialog-content.branch-picker-dialog {
+    padding: 26px 20px;
+    border-radius: 15px;
+  }
+
+  .branch-picker-dialog .branch-picker-title {
+    font-size: 26px;
+  }
+
+  .branch-picker-dialog .branch-picker-pin-entry > input {
+    font-size: 16px;
+  }
+
+  .branch-picker-dialog .branch-picker-card {
+    padding: 18px;
+  }
+
+  .branch-picker-dialog .branch-picker-card-heading {
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+
+  .branch-picker-dialog .branch-picker-confirm-actions {
+    flex-direction: column-reverse;
+  }
+
+  .branch-picker-dialog .branch-picker-confirm-actions > button {
+    width: 100%;
+  }
+}

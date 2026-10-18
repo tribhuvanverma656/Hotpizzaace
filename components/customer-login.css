@@ -1,0 +1,208 @@
+.customer-login-page {
+  padding-block: 42px 78px;
+}
+.customer-login-layout {
+  display: grid;
+  grid-template-columns: 1fr minmax(340px, 440px);
+  align-items: center;
+  gap: 9%;
+  max-width: 1030px;
+  margin: 28px auto 0;
+}
+.customer-login-intro h1 {
+  font-size: clamp(42px, 4.6vw, 64px);
+  line-height: 1.06;
+}
+.customer-login-intro > p {
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1.7;
+  max-width: 400px;
+  margin-top: 22px;
+}
+.customer-login-benefit {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-top: 32px;
+}
+.customer-login-benefit > span,
+.customer-login-icon {
+  display: grid;
+  place-items: center;
+  background: #f6ece1;
+  color: var(--red);
+  border-radius: 14px;
+  flex-shrink: 0;
+}
+.customer-login-benefit > span {
+  width: 48px;
+  height: 48px;
+}
+.customer-login-benefit strong {
+  display: block;
+  font-size: 14px;
+  margin: 3px 0 5px;
+}
+.customer-login-benefit p {
+  color: var(--muted);
+  line-height: 1.6;
+  max-width: 290px;
+}
+.customer-login-card {
+  padding: 32px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  box-shadow: 0 16px 48px #25252007;
+}
+.customer-login-icon {
+  width: 52px;
+  height: 52px;
+  margin-bottom: 24px;
+}
+.customer-login-steps {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 19px;
+}
+.customer-login-steps > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+}
+.customer-login-steps > span:nth-child(2) {
+  width: 24px;
+  height: 1px;
+  background: var(--line);
+}
+.customer-login-steps > .is-current {
+  color: var(--red);
+}
+.customer-login-card h2 {
+  font-size: 27px;
+  line-height: 1.15;
+}
+.customer-login-description {
+  color: var(--muted);
+  line-height: 1.6;
+  margin-top: 10px;
+}
+.customer-login-form {
+  display: grid;
+  gap: 18px;
+  margin-top: 25px;
+}
+.customer-login-form .field {
+  margin: 0;
+}
+.customer-login-form .field input {
+  font-size: 16px;
+  min-height: 50px;
+  width: 100%;
+}
+.customer-login-form .field small {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.5;
+}
+.customer-login-form > .btn {
+  width: 100%;
+}
+.customer-demo-code {
+  border: 1px solid #efd9b6;
+  background: #fff7e7;
+  padding: 14px 16px;
+  border-radius: 10px;
+}
+.customer-demo-code span {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+}
+.customer-demo-code strong {
+  display: block;
+  margin: 6px 0;
+  font-size: 24px;
+  letter-spacing: 6px;
+}
+.customer-demo-code small {
+  display: block;
+  color: #78684b;
+  line-height: 1.5;
+}
+.customer-login-secondary {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+.customer-login-secondary button {
+  border: 0;
+  background: transparent;
+  padding: 8px 0;
+  color: var(--red);
+  font-size: 12px;
+  font-weight: 700;
+}
+.customer-login-disclaimer {
+  margin-top: 25px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.6;
+}
+.customer-login-disclaimer strong {
+  display: block;
+  margin-bottom: 4px;
+  color: #686251;
+  font-weight: 600;
+}
+@media (max-width: 800px) {
+  .customer-login-page {
+    padding-block: 25px 48px;
+  }
+  .customer-login-layout {
+    grid-template-columns: 1fr;
+    gap: 28px;
+    max-width: 480px;
+    margin-top: 16px;
+  }
+  .customer-login-intro h1 {
+    font-size: 42px;
+  }
+  .customer-login-intro h1 br {
+    display: none;
+  }
+  .customer-login-intro > p {
+    margin-top: 15px;
+    font-size: 14px;
+  }
+  .customer-login-benefit {
+    display: none;
+  }
+  .customer-login-card {
+    padding: 25px;
+  }
+  .customer-login-icon {
+    width: 44px;
+    height: 44px;
+    margin-bottom: 18px;
+  }
+}
+@media (max-width: 380px) {
+  .customer-login-card {
+    padding: 22px 19px;
+  }
+  .customer-login-card h2 {
+    font-size: 24px;
+  }
+  .customer-login-intro h1 {
+    font-size: 37px;
+  }
+}

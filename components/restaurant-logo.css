@@ -1,0 +1,45 @@
+.restaurant-logo {
+  display: block;
+  height: auto;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+.restaurant-logo--header {
+  width: 72px;
+}
+.restaurant-logo--footer {
+  width: 150px;
+}
+.restaurant-logo--admin {
+  width: 128px;
+}
+.restaurant-logo--login {
+  width: 124px;
+}
+.brand.restaurant-brand {
+  min-width: 72px;
+  flex-shrink: 0;
+}
+.admin-brand.restaurant-admin-brand {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 9px;
+}
+.admin-brand.restaurant-admin-brand small {
+  margin-top: 0;
+  line-height: 1.5;
+}
+.admin-login-brand.restaurant-login-brand {
+  margin-bottom: 24px;
+}
+@media (max-width: 700px) {
+  .restaurant-logo--header {
+    width: 60px;
+  }
+  .brand.restaurant-brand {
+    min-width: 60px;
+  }
+  .restaurant-logo--footer {
+    width: 138px;
+  }
+}

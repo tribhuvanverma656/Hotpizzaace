@@ -1,0 +1,135 @@
+.status,
+.preview {
+  border: 1px solid;
+  border-radius: 9px;
+  padding: 15px;
+}
+
+.status > span,
+.preview > span {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.status > strong,
+.preview > strong {
+  font-size: 15px;
+}
+
+.status > p,
+.preview > p {
+  margin: 7px 0 0;
+  font-size: 11px;
+  line-height: 1.7;
+}
+
+.open {
+  background: #edf5e9;
+  border-color: #cfdfc7;
+  color: #3d6133;
+}
+
+.closed {
+  background: #fff2e9;
+  border-color: #edcfbb;
+  color: #88492f;
+}
+
+.preview {
+  background: #fffaf0;
+  border-color: #e7d5a6;
+  color: #785b1d;
+}
+
+.switchRow {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 50px;
+  cursor: pointer;
+}
+
+.switchRow > input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.switchTrack {
+  width: 42px;
+  height: 24px;
+  flex-shrink: 0;
+  border: 1px solid #aeb4a9;
+  border-radius: 999px;
+  background: #c2c7bd;
+  transition: background-color 150ms;
+}
+
+.switchTrack::after {
+  content: '';
+  display: block;
+  width: 18px;
+  height: 18px;
+  margin: 2px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px #0003;
+  transition: transform 150ms;
+}
+
+.switchRow > input:checked + .switchTrack {
+  border-color: #50763d;
+  background: #50763d;
+}
+
+.closureSwitch > input:checked + .switchTrack {
+  border-color: #b95433;
+  background: #b95433;
+}
+
+.switchRow > input:checked + .switchTrack::after {
+  transform: translateX(18px);
+}
+
+.switchRow > input:focus-visible + .switchTrack {
+  outline: 3px solid #df8b5f;
+  outline-offset: 3px;
+}
+
+.switchCopy {
+  flex: 1;
+  min-width: 0;
+}
+
+.switchCopy > strong {
+  color: #43503a;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.switchCopy > small {
+  display: block;
+  margin-top: 3px;
+  color: #777f6f;
+  font-size: 10px;
+  line-height: 1.7;
+}
+
+.switchState {
+  flex-shrink: 0;
+  color: #536348;
+  font-size: 11px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .switchTrack,
+  .switchTrack::after {
+    transition: none;
+  }
+}

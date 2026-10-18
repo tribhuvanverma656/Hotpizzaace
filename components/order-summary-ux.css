@@ -1,0 +1,276 @@
+.order-summary.order-summary-polished {
+  padding: 26px;
+  border-color: #e7e3dc;
+  border-radius: 18px;
+  background: #fffefa;
+  box-shadow: 0 7px 28px #35270d05;
+}
+
+.order-summary.order-summary-polished .summary-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 26px;
+}
+
+.order-summary.order-summary-polished .summary-heading h3 {
+  margin: 0;
+  font-size: 21px;
+  font-weight: 650;
+  letter-spacing: -0.45px;
+}
+
+.order-summary.order-summary-polished .summary-heading > span {
+  color: #777569;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.order-summary.order-summary-polished .summary-row {
+  align-items: baseline;
+  margin-bottom: 16px;
+  color: #747166;
+  font-size: 13px;
+}
+
+.order-summary.order-summary-polished .summary-row > b {
+  font-weight: 550;
+  font-variant-numeric: tabular-nums;
+}
+
+.order-summary.order-summary-polished .summary-row.green-text,
+.order-summary.order-summary-polished .summary-row.green-text > b {
+  color: #527343;
+}
+
+.order-summary.order-summary-polished .summary-total {
+  margin-top: 21px;
+  padding-top: 20px;
+  border-top: 1px solid #e7e3dc;
+  font-size: 15px;
+}
+
+.order-summary.order-summary-polished .summary-total > strong {
+  font-size: 29px;
+  font-weight: 650;
+  letter-spacing: -0.8px;
+  font-variant-numeric: tabular-nums;
+}
+
+.order-summary.order-summary-polished .summary-delivery-progress {
+  margin-top: 20px;
+  padding: 13px 14px;
+  border: 1px solid #e3e8d9;
+  border-radius: 10px;
+  background: #f3f6ec;
+  color: #526c3f;
+}
+
+.order-summary.order-summary-polished .summary-delivery-progress > div {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.order-summary.order-summary-polished .summary-delivery-progress svg {
+  flex-shrink: 0;
+}
+
+.order-summary.order-summary-polished .summary-delivery-progress strong {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.order-summary.order-summary-polished .summary-delivery-progress progress {
+  display: block;
+  width: 100%;
+  height: 4px;
+  margin: 10px 0 8px;
+  overflow: hidden;
+  appearance: none;
+  border: 0;
+  border-radius: 10px;
+  background: #dce4d0;
+  color: #779756;
+}
+
+.order-summary.order-summary-polished .summary-delivery-progress progress::-webkit-progress-bar {
+  border-radius: 10px;
+  background: #dce4d0;
+}
+
+.order-summary.order-summary-polished .summary-delivery-progress progress::-webkit-progress-value {
+  border-radius: 10px;
+  background: #779756;
+}
+
+.order-summary.order-summary-polished .summary-delivery-progress progress::-moz-progress-bar {
+  border-radius: 10px;
+  background: #779756;
+}
+
+.order-summary.order-summary-polished .summary-delivery-progress > p {
+  margin: 0;
+  font-size: 10px;
+  line-height: 1.6;
+  color: #768266;
+}
+
+.order-summary.order-summary-polished .coupon-input-area {
+  margin: 22px 0;
+  padding-top: 18px;
+  border-color: #e7e3dc;
+}
+
+.order-summary.order-summary-polished .summary-coupon-disclosure > summary {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: #6b665a;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  list-style: none;
+}
+
+.order-summary.order-summary-polished .summary-coupon-disclosure > summary::-webkit-details-marker {
+  display: none;
+}
+
+.order-summary.order-summary-polished .summary-coupon-chevron {
+  margin-left: auto;
+}
+
+.order-summary.order-summary-polished .summary-coupon-disclosure[open] .summary-coupon-chevron {
+  transform: rotate(180deg);
+}
+
+.order-summary.order-summary-polished .summary-coupon-label {
+  display: block;
+  margin: 16px 0 7px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #767063;
+}
+
+.order-summary.order-summary-polished .coupon-entry {
+  gap: 8px;
+  min-height: 47px;
+  padding: 4px 5px 4px 12px;
+  border-style: solid;
+  border-color: #dcd6c9;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.order-summary.order-summary-polished .coupon-entry:focus-within {
+  border-color: #b58360;
+  box-shadow: 0 0 0 2px #bd876b1a;
+}
+
+.order-summary.order-summary-polished .coupon-entry > input {
+  width: 100%;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+}
+
+.order-summary.order-summary-polished .coupon-entry > input::placeholder {
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.order-summary.order-summary-polished .coupon-entry > .summary-coupon-apply {
+  flex-shrink: 0;
+  min-width: 60px;
+  min-height: 35px;
+  padding: 7px 12px;
+  border-radius: 5px;
+  background: #f7eee6;
+  color: #a2482e;
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.order-summary.order-summary-polished .summary-coupon-offer {
+  margin-top: 10px;
+  font-size: 11px;
+  line-height: 1.7;
+  color: #888174;
+}
+
+.order-summary.order-summary-polished .summary-coupon-error {
+  margin-top: 10px;
+  font-size: 11px;
+  line-height: 1.6;
+  color: #ac422b;
+}
+
+.order-summary.order-summary-polished .applied-coupon {
+  padding: 12px;
+  border: 1px solid #dce6d3;
+  border-radius: 9px;
+  background: #f2f7eb;
+  font-size: 12px;
+}
+
+.order-summary.order-summary-polished .applied-coupon > button {
+  width: 28px;
+  height: 28px;
+}
+
+.order-summary.order-summary-polished .summary-checkout {
+  min-height: 49px;
+  padding: 14px 17px;
+  border-radius: 9px;
+  font-size: 13px;
+}
+
+.order-summary.order-summary-polished .minimum-note,
+.order-summary.order-summary-polished .checkout-terms {
+  font-size: 11px;
+  line-height: 1.7;
+}
+
+.order-summary.order-summary-polished .summary-disclosure {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 17px;
+  color: #8f887c;
+  font-size: 10px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.order-summary.order-summary-polished .summary-disclosure > svg {
+  flex-shrink: 0;
+}
+
+.order-summary.order-summary-polished .summary-coupon-disclosure > summary:focus-visible,
+.order-summary.order-summary-polished .coupon-input-area button:focus-visible {
+  outline: 2px solid #b58360;
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
+@media (max-width: 640px) {
+  .order-summary.order-summary-polished {
+    padding: 22px;
+    border-radius: 14px;
+  }
+
+  .order-summary.order-summary-polished .summary-heading h3 {
+    font-size: 20px;
+  }
+
+  .order-summary.order-summary-polished .summary-row {
+    font-size: 13px;
+  }
+
+  .order-summary.order-summary-polished .coupon-entry > input {
+    font-size: 16px;
+  }
+}

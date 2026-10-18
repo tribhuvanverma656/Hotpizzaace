@@ -1,0 +1,779 @@
+{
+  "sourcePage": "https://www.zomato.com/kanpur/hot-pizza-ace-barra/order",
+  "retrievedAt": "2026-10-17",
+  "policy": "Use only photos matched to this restaurant’s Zomato ordering page. Printed-menu prices and item scope are unchanged. Matching allows spelling aliases and the same base dish without size suffixes. Dishes without a verified corresponding Zomato photo show a neutral Photo coming soon placeholder; photos cropped from the supplied menu sheets are not used. Any photo visibly containing the Zomato word or logo is excluded entirely, including branding on a red table tag. No watermark is edited or removed. Restaurant Hot Pizza Ace branding is allowed.",
+  "matches": [
+    {
+      "slug": "simple-cheese",
+      "zomatoDishName": "Margherita Cheese Pizza",
+      "sourceImageUrl": "https://b.zmtcdn.com/data/dish_photos/3dd/a30f034f6a227bed3684176af4f993dd.jpg",
+      "localPath": "/images/menu/simple-cheese.jpg",
+      "catalogueName": "Simple Cheese"
+    },
+    {
+      "slug": "cheese-tomato",
+      "zomatoDishName": "Cheese Tomato Pizza",
+      "sourceImageUrl": "https://b.zmtcdn.com/data/dish_photos/515/80bb373bd30f828686d07d5a66b79515.jpg",
+      "localPath": "/images/menu/cheese-tomato.jpg",
+      "catalogueName": "Cheese Tomato"
+    },
+    {
+      "slug": "green-chilli-corn",
+      "zomatoDishName": "Green Chiili Corn Pizza",
+      "sourceImageUrl": "https://b.zmtcdn.com/data/dish_photos/24a/31fbf87637042ba3116395d9b7ed624a.jpg",
+      "localPath": "/images/menu/green-chilli-corn.jpg",
+      "catalogueName": "Green Chilli Corn"
+    },
+    {
+      "slug": "double-cheese",
+      "zomatoDishName": "Double Cheese Pizza",
+      "sourceImageUrl": "https://b.zmtcdn.com/data/dish_photos/3dd/a30f034f6a227bed3684176af4f993dd.jpg",
+      "localPath": "/images/menu/double-cheese.jpg",
+      "catalogueName": "Double Cheese"
+    },
+    {
+      "slug": "fresh-vegi",
+      "zomatoDishName": "Fresh Veggie Pizza",
+      "sourceImageUrl": "https://b.zmtcdn.com/data/dish_photos/1f9/5904adce93d08731139a4b75718b71f9.jpg",
+      "localPath": "/images/menu/fresh-vegi.jpg",
+      "catalogueName": "Fresh Vegi"
+    },
+    {
+      "slug": "vegi-lover",
+      "zomatoDishName": "Veggie Lover Pizza",
+      "sourceImageUrl": "https://b.zmtcdn.com/data/dish_photos/e40/365f1dc6027c9bbe236208e8919b7e40.jpg",
+      "localPath": "/images/menu/vegi-lover.jpg",
+      "catalogueName": "Vegi Lover"
+    },
+    {
+      "slug": "real-mozzarella",
+      "zomatoDishName": "Real Mozzarella Pizza",
+      "sourceImageUrl": "https://b.zmtcdn.com/data/dish_photos/3dd/a30f034f6a227bed3684176af4f993dd.jpg",
+      "localPath": "/images/menu/real-mozzarella.jpg",
+      "catalogueName": "Real Mozzarella"
+    },
+    {
+      "slug": "country-feast",
+      "zomatoDishName": "Country Feast Pizza",
+      "sourceImageUrl": "https://b.zmtcdn.com/data/dish_photos/968/9443060faea2ce7c1127df5fee815968.jpg",
+      "localPath": "/images/menu/country-feast.jpg",
+      "catalogueName": "Country Feast"
+    },
+    {
+      "slug": "makhani-paneer",
+      "zomatoDishName": "Makhani Paneer Pizza",
+      "sourceImageUrl": "https://b.zmtcdn.com/data/dish_photos/0d2/1ed475bdc6666714b3e60879cb1650d2.jpg",
+      "localPath": "/images/menu/makhani-paneer.jpg",
+      "catalogueName": "Makhani Paneer"
+    },
+    {
+      "slug": "paneer-angara",
+      "zomatoDishName": "Paneer Angaara Pizza",
+      "sourceImageUrl": "https://b.zmtcdn.com/data/dish_photos/ad2/593bbacf6173f6c92992bb50e722aad2.jpg",
+      "localPath": "/images/menu/paneer-angara.jpg",
+      "catalogueName": "Paneer Angara"
+    },
+    {
+      "slug": "spicy-spicy-pizza",
+      "zomatoDishName": "Spicy Spicy Pizza",
+      "sourceImageUrl": "https://b.zmtcdn.com/data/dish_photos/dc9/d73e6e56c8bbf06cfbea6db7a2632dc9.jpg",
+      "localPath": "/images/menu/spicy-spicy-pizza.jpg",
+      "catalogueName": "Spicy Spicy Pizza"
+    },
+    {
+      "slug": "farm-fresh",
+      "zomatoDishName": "Farm Fresh Pizza",
+      "sourceImageUrl": "https://b.zmtcdn.com/data/dish_photos/df2/069c8bcd6aed02ea86661ede88869df2.jpg",
+      "localPath": "/images/menu/farm-fresh.jpg",
+      "catalogueName": "Farm Fresh"
+    },
+    {
+      "slug": "spicy-loaded",
+      "zomatoDishName": "Spicy Loaded Pizza",
+      "sourceImageUrl": "https://b.zmtcdn.com/data/dish_photos/fbb/f1a6411521e707e1cd5ad0d4930a0fbb.jpg",
+      "localPath": "/images/menu/spicy-loaded.jpg",
+      "catalogueName": "Spicy Loaded"
+    },
+    {
+      "slug": "achari-paneer",
+      "zomatoDishName": "Achari Paneer Pizza",
+      "sourceImageUrl": "https://b.zmtcdn.com/data/dish_photos/9fe/3d68e8a5195cfd78bef12a519d5499fe.jpg",
+      "localPath": "/images/menu/achari-paneer.jpg",
+      "catalogueName": "Achari Paneer"
+    },
+    {
+      "slug": "poney-achari",
+      "zomatoDishName": "Popeye Achari Pizza",
+      "sourceImageUrl": "https://b.zmtcdn.com/data/dish_photos/094/80441af50cad1dca046e7d81fc4a3094.jpg",
+      "localPath": "/images/menu/poney-achari.jpg",
+      "catalogueName": "Poney Achari"
+    },
+    {
+      "slug": "veg-paradise",
+      "zomatoDishName": "Veg Paradise Pizza",
+      "sourceImageUrl": "https://b.zmtcdn.com/data/dish_photos/76e/2a3225b04d3b15761b28b23d52e0276e.jpg",
+      "localPath": "/images/menu/veg-paradise.jpg",
+      "catalogueName": "Veg. Paradise"
+    },
+    {
+      "slug": "veg-triple-tango",
+      "zomatoDishName": "Veg Triple Tango Pizza",
+      "sourceImageUrl": "https://b.zmtcdn.com/data/dish_photos/118/f382e772b7777f52f383086b83c47118.jpg",
+      "localPath": "/images/menu/veg-triple-tango.jpg",
+      "catalogueName": "Veg. Triple Tango"
+    },
+    {
+      "slug": "deluxe-delight",
+      "zomatoDishName": "Deluxe Delight Pizza",
+      "sourceImageUrl": "https://b.zmtcdn.com/data/dish_photos/03b/b80d7ec1c6bf2a7fcb8798a49502f03b.jpg",
+      "localPath": "/images/menu/deluxe-delight.jpg",
+      "catalogueName": "Deluxe Delight"
+    },
+    {
+      "slug": "green-house",
+      "zomatoDishName": "Green House Pizza",
+      "sourceImageUrl": "https://b.zmtcdn.com/data/dish_photos/c14/05960fb2d5886683873ae1d0042d5c14.jpeg",
+      "localPath": "/images/menu/green-house.jpg",
+      "catalogueName": "Green House"
+    },
+    {
+      "slug": "ace-chilli-paneer",
+      "zomatoDishName": "Ace Chilli Paneer Pizza",
+      "sourceImageUrl": "https://b.zmtcdn.com/data/dish_photos/82c/81696f17afaef5ca8122ea3c2037a82c.jpg",
+      "localPath": "/images/menu/ace-chilli-paneer.jpg",
+      "catalogueName": "Ace Chilli Paneer"
+    },
+    {
+      "slug": "maxican-pizza",
+      "zomatoDishName": "Mexican Pizza (Small, 7 inches)",
+      "sourceImageUrl": "https://b.zmtcdn.com/data/dish_photos/1e3/74115145b7d1adb55f8a9076457111e3.jpeg",
+      "localPath": "/images/menu/maxican-pizza.jpg",
+      "catalogueName": "Maxican Pizza"
+    },
+    {
+      "slug": "paneer-peppy",
+      "zomatoDishName": "Paneer Peppey Pizza",
+      "sourceImageUrl": "https://b.zmtcdn.com/data/dish_photos/676/02d23b7d2bd1a045023a504c2164c676.jpg",
+      "localPath": "/images/menu/paneer-peppy.jpg",
+      "catalogueName": "Paneer Peppy"
+    },
+    {
+      "slug": "ace-exotica-pizza",
+      "zomatoDishName": "Ace Exotica Pizza",
+      "sourceImageUrl": "https://b.zmtcdn.com/data/dish_photos/1a1/12c00c86ccee02e5a114cecf287741a1.jpg",
+      "localPath": "/images/menu/ace-exotica-pizza.jpg",
+      "catalogueName": "Ace Exotica Pizza"
+    },
+    {
+      "slug": "ace-spicy-twist",
+      "zomatoDishName": "Ace Spicy Twist Pizza",
+      "sourceImageUrl": "https://b.zmtcdn.com/data/dish_photos/827/4504fa657319d05bd3b75a7be34b2827.jpg",
+      "localPath": "/images/menu/ace-spicy-twist.jpg",
+      "catalogueName": "Ace Spicy Twist"
+    },
+    {
+      "slug": "veg-supreme",
+      "zomatoDishName": "Veg Supreme Pizza",
+      "sourceImageUrl": "https://b.zmtcdn.com/data/dish_photos/c2d/b6246ab21f877a5acf2fa39d08415c2d.jpeg",
+      "localPath": "/images/menu/veg-supreme.jpg",
+      "catalogueName": "Veg Supreme"
+    },
+    {
+      "slug": "tanduri-paneer",
+      "zomatoDishName": "Tandoori Paneer Pizza",
+      "sourceImageUrl": "https://b.zmtcdn.com/data/dish_photos/df1/59d187a7424d87509c22b7f219b5bdf1.jpeg",
+      "localPath": "/images/menu/tanduri-paneer.jpg",
+      "catalogueName": "Tanduri Paneer"
+    },
+    {
+      "slug": "tanduri-mushroom",
+      "zomatoDishName": "Tandoori Mushroom Pizza",
+      "sourceImageUrl": "https://b.zmtcdn.com/data/dish_photos/f18/dc086f39a358a38dbc21224f82109f18.jpg",
+      "localPath": "/images/menu/tanduri-mushroom.jpg",
+      "catalogueName": "Tanduri Mushroom"
+    },
+    {
+      "slug": "spicy-veg-wonder",
+      "zomatoDishName": "Spicy Veg Wonder Pizza",
+      "sourceImageUrl": "https://b.zmtcdn.com/data/dish_photos/aba/be6b4c81488e5ad1d5ddfc279b318aba.jpg",
+      "localPath": "/images/menu/spicy-veg-wonder.jpg",
+      "catalogueName": "Spicy Veg Wonder"
+    },
+    {
+      "slug": "ace-paneer-vegi",
+      "zomatoDishName": "Ace Paneer Vegi Pizza",
+      "sourceImageUrl": "https://b.zmtcdn.com/data/dish_photos/a27/2875431711d798ebeb2516fe92502a27.jpg",
+      "localPath": "/images/menu/ace-paneer-vegi.jpg",
+      "catalogueName": "Ace Paneer Vegi"
+    },
+    {
+      "slug": "ace-pasta-pizza",
+      "zomatoDishName": "Ace Pasta Pizza",
+      "sourceImageUrl": "https://b.zmtcdn.com/data/dish_photos/612/b887221a64c89a2ae0d3552def423612.jpg",
+      "localPath": "/images/menu/ace-pasta-pizza.jpg",
+      "catalogueName": "Ace Pasta Pizza"
+    },
+    {
+      "slug": "delight-golden-corn",
+      "zomatoDishName": "Delight Golden Corn Pizza",
+      "sourceImageUrl": "https://b.zmtcdn.com/data/dish_photos/247/d61f2226bee5619c94465cd8b07f8247.jpg",
+      "localPath": "/images/menu/delight-golden-corn.jpg",
+      "catalogueName": "Delight Golden Corn"
+    },
+    {
+      "slug": "ace-veg-house",
+      "zomatoDishName": "Ace Veg House Pizza (Small)",
+      "sourceImageUrl": "https://b.zmtcdn.com/data/dish_photos/7c1/150478f28695860bb71e3d10b4d687c1.jpeg",
+      "localPath": "/images/menu/ace-veg-house.jpg",
+      "catalogueName": "Ace Veg House"
+    },
+    {
+      "slug": "make-your-choice-pizza-with-extra-cheese",
+      "zomatoDishName": "Make Your Small Pizza with Extra Cheese",
+      "sourceImageUrl": "https://b.zmtcdn.com/data/dish_photos/3dd/a30f034f6a227bed3684176af4f993dd.jpg",
+      "localPath": "/images/menu/make-your-choice-pizza-with-extra-cheese.jpg",
+      "catalogueName": "Make Your Choice Pizza with Extra Cheese"
+    },
+    {
+      "slug": "corn-paneer",
+      "zomatoDishName": "Corn and Paneer Pizza",
+      "sourceImageUrl": "https://b.zmtcdn.com/data/dish_photos/1b1/0f6b3a55b220ac242f01b786cf2581b1.jpg",
+      "localPath": "/images/menu/corn-paneer.jpg",
+      "catalogueName": "Corn & Paneer"
+    },
+    {
+      "slug": "paneer-capsicum",
+      "zomatoDishName": "Cheese Paneer Capsicum Pizza (Small, 7 inches)",
+      "sourceImageUrl": "https://b.zmtcdn.com/data/dish_photos/a42/336c620f2c44bbdcabb602528120aa42.jpeg",
+      "localPath": "/images/menu/paneer-capsicum.jpg",
+      "catalogueName": "Paneer & Capsicum"
+    },
+    {
+      "slug": "onion-capsicum",
+      "zomatoDishName": "Onion and capsicum Pizza",
+      "sourceImageUrl": "https://b.zmtcdn.com/data/dish_photos/acb/741b36299285ffd2dc3cdd34fa432acb.jpeg",
+      "localPath": "/images/menu/onion-capsicum.jpg",
+      "catalogueName": "Onion & Capsicum"
+    },
+    {
+      "slug": "onion-corn",
+      "zomatoDishName": "Onion and corn Pizza",
+      "sourceImageUrl": "https://b.zmtcdn.com/data/dish_photos/b8a/6791208d78d6480795b6abb823c9bb8a.jpg",
+      "localPath": "/images/menu/onion-corn.jpg",
+      "catalogueName": "Onion & Corn"
+    },
+    {
+      "slug": "tomato-corn",
+      "zomatoDishName": "Tomato and corn pizza",
+      "sourceImageUrl": "https://b.zmtcdn.com/data/dish_photos/8c3/80c343a618e8951df2f502d6683418c3.jpg",
+      "localPath": "/images/menu/tomato-corn.jpg",
+      "catalogueName": "Tomato & Corn"
+    },
+    {
+      "slug": "tomato-capsicum",
+      "zomatoDishName": "Tomato and Capsicum Pizza",
+      "sourceImageUrl": "https://b.zmtcdn.com/data/dish_photos/b8d/7ed9b9da103518cc540401642801bb8d.jpg",
+      "localPath": "/images/menu/tomato-capsicum.jpg",
+      "catalogueName": "Tomato & Capsicum"
+    },
+    {
+      "slug": "onion-redpepper",
+      "zomatoDishName": "Onion and Red Pepper Pizza",
+      "sourceImageUrl": "https://b.zmtcdn.com/data/dish_photos/59b/8261d559ae6711fa9fc1ec6805a3659b.jpg",
+      "localPath": "/images/menu/onion-redpepper.jpg",
+      "catalogueName": "Onion & Redpepper"
+    },
+    {
+      "slug": "spicy-paneer",
+      "zomatoDishName": "Spicy Paneer Cheese Pizza (7 inches)",
+      "sourceImageUrl": "https://b.zmtcdn.com/data/dish_photos/5d5/18eadef280e71f77d428099c907f95d5.jpeg",
+      "localPath": "/images/menu/spicy-paneer.jpg",
+      "catalogueName": "Spicy Paneer"
+    },
+    {
+      "slug": "onion-paneer",
+      "zomatoDishName": "Onion and Paneer Pizza",
+      "sourceImageUrl": "https://b.zmtcdn.com/data/dish_photos/768/4aa1dc914e299dd6ec86c88ceff30768.jpeg",
+      "localPath": "/images/menu/onion-paneer.jpg",
+      "catalogueName": "Onion & Paneer"
+    },
+    {
+      "slug": "jalapeno-corn",
+      "zomatoDishName": "Jalapeno and Corn Pizza",
+      "sourceImageUrl": "https://b.zmtcdn.com/data/dish_photos/dc5/be508b3f3b73397cd2ced5b45a754dc5.jpg",
+      "localPath": "/images/menu/jalapeno-corn.jpg",
+      "catalogueName": "Jalapeno & Corn"
+    },
+    {
+      "slug": "babycorn-capsicum",
+      "zomatoDishName": "Baby Corn and Capsicum Pizza",
+      "sourceImageUrl": "https://b.zmtcdn.com/data/dish_photos/b1f/9d414674e6d440d66b4aab5f352f4b1f.jpg",
+      "localPath": "/images/menu/babycorn-capsicum.jpg",
+      "catalogueName": "Babycorn & Capsicum"
+    },
+    {
+      "slug": "french-fries",
+      "zomatoDishName": "French Fries",
+      "sourceImageUrl": "https://b.zmtcdn.com/data/dish_photos/5d9/0d5c2340c3afe480a94bda62dddf75d9.jpeg",
+      "localPath": "/images/menu/french-fries.jpg",
+      "catalogueName": "French Fries"
+    },
+    {
+      "slug": "cheese-garlic-bread",
+      "zomatoDishName": "Cheese Garlic Bread",
+      "sourceImageUrl": "https://b.zmtcdn.com/data/dish_photos/299/270363359179d26a3d0e4ab8b19ff299.jpeg",
+      "localPath": "/images/menu/cheese-garlic-bread.jpg",
+      "catalogueName": "Cheese Garlic Bread"
+    },
+    {
+      "slug": "stuffed-garlic-bread",
+      "zomatoDishName": "Stuffed Garlic Bread",
+      "sourceImageUrl": "https://b.zmtcdn.com/data/dish_photos/beb/b70a9acf062879c58aeeb62f5bed4beb.jpg",
+      "localPath": "/images/menu/stuffed-garlic-bread.jpg",
+      "catalogueName": "Stuffed Garlic Bread"
+    },
+    {
+      "slug": "chilli-cheese-garlic-bread",
+      "zomatoDishName": "Chilli Cheese Garlic Bread",
+      "sourceImageUrl": "https://b.zmtcdn.com/data/dish_photos/ecf/2fe6a0eb071e42e809ae5a95b1b8fecf.jpeg",
+      "localPath": "/images/menu/chilli-cheese-garlic-bread.jpg",
+      "catalogueName": "Chilli Cheese Garlic Bread"
+    },
+    {
+      "slug": "pocket-calzone",
+      "zomatoDishName": "Pocket Calzone",
+      "sourceImageUrl": "https://b.zmtcdn.com/data/dish_photos/214/c4d8bd33a05d041ed8e20711ce547214.jpeg",
+      "localPath": "/images/menu/pocket-calzone.jpg",
+      "catalogueName": "Pocket Calzone"
+    },
+    {
+      "slug": "cheese-wrap",
+      "zomatoDishName": "Special Cheese Wrap",
+      "sourceImageUrl": "https://b.zmtcdn.com/data/dish_photos/c29/a80ded8e4e5352b92172c7cf58465c29.jpeg",
+      "localPath": "/images/menu/cheese-wrap.jpg",
+      "catalogueName": "Cheese Wrap"
+    },
+    {
+      "slug": "paneer-cheese-wrap",
+      "zomatoDishName": "Panner Cheese Wrap",
+      "sourceImageUrl": "https://b.zmtcdn.com/data/dish_photos/631/aa29f7eaef42e9f9a15b5cee4aaad631.jpeg",
+      "localPath": "/images/menu/paneer-cheese-wrap.jpg",
+      "catalogueName": "Paneer Cheese Wrap"
+    },
+    {
+      "slug": "mix-special-cheese-wrap",
+      "zomatoDishName": "Mix Special Cheese Wrap",
+      "sourceImageUrl": "https://b.zmtcdn.com/data/dish_photos/c29/a80ded8e4e5352b92172c7cf58465c29.jpeg",
+      "localPath": "/images/menu/mix-special-cheese-wrap.jpg",
+      "catalogueName": "Mix Special Cheese Wrap"
+    },
+    {
+      "slug": "aloo-tikki-burger",
+      "zomatoDishName": "Aloo Tikki Burger",
+      "sourceImageUrl": "https://b.zmtcdn.com/data/dish_photos/ed7/60658a289af3765a9aa8ee6d0a52ced7.jpg",
+      "localPath": "/images/menu/aloo-tikki-burger.jpg",
+      "catalogueName": "Aloo Tikki Burger"
+    },
+    {
+      "slug": "cheese-burger",
+      "zomatoDishName": "Cheese Burger",
+      "sourceImageUrl": "https://b.zmtcdn.com/data/dish_photos/410/015341dbf5111fd1c1cf10557b533410.jpg",
+      "localPath": "/images/menu/cheese-burger.jpg",
+      "catalogueName": "Cheese Burger"
+    },
+    {
+      "slug": "veg-hariyali-burger",
+      "zomatoDishName": "Veg Haryali Burger",
+      "sourceImageUrl": "https://b.zmtcdn.com/data/dish_photos/ae6/a8f5ffc6e1be64ed34f45a2df8d7eae6.jpg",
+      "localPath": "/images/menu/veg-hariyali-burger.jpg",
+      "catalogueName": "Veg Hariyali Burger"
+    },
+    {
+      "slug": "spicy-burger",
+      "zomatoDishName": "Spicy Burger",
+      "sourceImageUrl": "https://b.zmtcdn.com/data/dish_photos/e17/b92cec830204e6bdff5e79540fae9e17.jpg",
+      "localPath": "/images/menu/spicy-burger.jpg",
+      "catalogueName": "Spicy Burger"
+    },
+    {
+      "slug": "paneer-burger",
+      "zomatoDishName": "Paneer Burger",
+      "sourceImageUrl": "https://b.zmtcdn.com/data/dish_photos/005/a91d8927ac921ec6e44f03829c112005.jpg",
+      "localPath": "/images/menu/paneer-burger.jpg",
+      "catalogueName": "Paneer Burger"
+    },
+    {
+      "slug": "tandoori-paneer-burger",
+      "zomatoDishName": "Tandoori Paneer Burger",
+      "sourceImageUrl": "https://b.zmtcdn.com/data/dish_photos/b70/2e17b00371a97448f269dee4a55f4b70.jpg",
+      "localPath": "/images/menu/tandoori-paneer-burger.jpg",
+      "catalogueName": "Tandoori Paneer Burger"
+    },
+    {
+      "slug": "double-cheese-burger",
+      "zomatoDishName": "Double Cheese Burger",
+      "sourceImageUrl": "https://b.zmtcdn.com/data/dish_photos/600/3954c16fb4724b509cebcb9a11a33600.jpg",
+      "localPath": "/images/menu/double-cheese-burger.jpg",
+      "catalogueName": "Double Cheese Burger"
+    },
+    {
+      "slug": "choco-lava-cake",
+      "zomatoDishName": "Choco Lava Cake",
+      "sourceImageUrl": "https://b.zmtcdn.com/data/dish_photos/327/66aa0295b48bc2c4a615810b2e34b327.jpg",
+      "localPath": "/images/menu/choco-lava-cake.jpg",
+      "catalogueName": "Choco Lava Cake"
+    },
+    {
+      "slug": "hot-chocolate-browny-with-ice-cream",
+      "zomatoDishName": "Hot Chocolate Brownie with Vanilla Ice Cream",
+      "sourceImageUrl": "https://b.zmtcdn.com/data/dish_photos/5be/5bfcc2e212be22c09e629a49215345be.jpeg",
+      "localPath": "/images/menu/hot-chocolate-browny-with-ice-cream.jpg",
+      "catalogueName": "Hot Chocolate Browny with Ice Cream"
+    },
+    {
+      "slug": "cheese-dip",
+      "zomatoDishName": "Cheese Dip",
+      "sourceImageUrl": "https://b.zmtcdn.com/data/dish_photos/82f/18719efb4341c4348e7ccf3ec5bdd82f.jpg",
+      "localPath": "/images/menu/cheese-dip.jpg",
+      "catalogueName": "Cheese Dip"
+    },
+    {
+      "slug": "combo-3",
+      "zomatoDishName": "Set of 4 Pizza Combo",
+      "sourceImageUrl": "https://b.zmtcdn.com/data/dish_photos/94d/af1a53cc0783d61f93f230175ffc694d.jpg",
+      "localPath": "/images/menu/combo-3.jpg",
+      "catalogueName": "Combo 3"
+    },
+    {
+      "slug": "combo-5",
+      "zomatoDishName": "Club House Combo Double Topping",
+      "sourceImageUrl": "https://b.zmtcdn.com/data/dish_photos/7bc/8eb8049cadd6a7a66449dbc4d777a7bc.jpg",
+      "localPath": "/images/menu/combo-5.jpg",
+      "catalogueName": "Combo 5"
+    },
+    {
+      "slug": "combo-9-veg-single-combo",
+      "zomatoDishName": "Club House Combo Single Topping",
+      "sourceImageUrl": "https://b.zmtcdn.com/data/dish_photos/d4a/abb18080ecac66aba0250e17f42a4d4a.jpeg",
+      "localPath": "/images/menu/combo-9-veg-single-combo.jpg",
+      "catalogueName": "Combo 9 · Veg Single Combo"
+    },
+    {
+      "slug": "cold-coffee",
+      "zomatoDishName": "Cold Coffee",
+      "sourceImageUrl": "https://b.zmtcdn.com/data/dish_photos/4bf/7210d2beb5765ab94574645bd472b4bf.jpeg",
+      "localPath": "/images/menu/cold-coffee.jpg",
+      "catalogueName": "Cold Coffee"
+    },
+    {
+      "slug": "chocolate-milk-shake",
+      "zomatoDishName": "Chocolate Milk Shake",
+      "sourceImageUrl": "https://b.zmtcdn.com/data/dish_photos/9aa/6f9c8b294985470f6a1f656e2db019aa.jpg",
+      "localPath": "/images/menu/chocolate-milk-shake.jpg",
+      "catalogueName": "Chocolate Milk Shake"
+    },
+    {
+      "slug": "vanila-milk-shake",
+      "zomatoDishName": "Vanilla Milk Shake",
+      "sourceImageUrl": "https://b.zmtcdn.com/data/dish_photos/a71/6ec6e63e09d51315919c9ce8db001a71.jpg",
+      "localPath": "/images/menu/vanila-milk-shake.jpg",
+      "catalogueName": "Vanila Milk Shake"
+    },
+    {
+      "slug": "strawberry-milk-shake",
+      "zomatoDishName": "Strawberry Milk Shake",
+      "sourceImageUrl": "https://b.zmtcdn.com/data/dish_photos/00a/decad770024c57e4ef3257a95355700a.jpeg",
+      "localPath": "/images/menu/strawberry-milk-shake.jpg",
+      "catalogueName": "Strawberry Milk Shake"
+    },
+    {
+      "slug": "kaju-butter-scotch",
+      "zomatoDishName": "Kaju Butter Scotch Milk Shake",
+      "sourceImageUrl": "https://b.zmtcdn.com/data/dish_photos/af2/c0f453a333a3fb519a47d3f9a64b8af2.jpg",
+      "localPath": "/images/menu/kaju-butter-scotch.jpg",
+      "catalogueName": "Kaju Butter Scotch"
+    },
+    {
+      "slug": "blue-carlo-mojito",
+      "zomatoDishName": "Blue Curacao Mocktail (250 ml)",
+      "sourceImageUrl": "https://b.zmtcdn.com/data/dish_photos/2e6/29274a418ba953fc819987b73c6022e6.jpeg",
+      "localPath": "/images/menu/blue-carlo-mojito.jpg",
+      "catalogueName": "Blue Carlo Mojito"
+    }
+  ],
+  "missing": [
+    {
+      "slug": "tomato-tandoori",
+      "name": "Tomato Tandoori",
+      "reason": "No clear corresponding dish photo on the restaurant’s ordering page; a different recipe or portion was not substituted."
+    },
+    {
+      "slug": "french-fri-pizza",
+      "name": "French Fri Pizza",
+      "reason": "No clear corresponding dish photo on the restaurant’s ordering page; a different recipe or portion was not substituted."
+    },
+    {
+      "slug": "mazza-achari",
+      "name": "Mazza Achari",
+      "reason": "No clear corresponding dish photo on the restaurant’s ordering page; a different recipe or portion was not substituted."
+    },
+    {
+      "slug": "paneer-paprika",
+      "name": "Paneer Paprika",
+      "reason": "No clear corresponding dish photo on the restaurant’s ordering page; a different recipe or portion was not substituted."
+    },
+    {
+      "slug": "spicy-fire",
+      "name": "Spicy Fire",
+      "reason": "No clear corresponding dish photo on the restaurant’s ordering page; a different recipe or portion was not substituted."
+    },
+    {
+      "slug": "classic-pizza",
+      "name": "Classic Pizza",
+      "reason": "No clear corresponding dish photo on the restaurant’s ordering page; a different recipe or portion was not substituted."
+    },
+    {
+      "slug": "tanduri-tomato",
+      "name": "Tanduri Tomato",
+      "reason": "No clear corresponding dish photo on the restaurant’s ordering page; a different recipe or portion was not substituted."
+    },
+    {
+      "slug": "veg-single",
+      "name": "Veg Single",
+      "reason": "No clear corresponding dish photo on the restaurant’s ordering page; a different recipe or portion was not substituted."
+    },
+    {
+      "slug": "spicy-corn-capsicum",
+      "name": "Spicy Corn & Capsicum",
+      "reason": "No clear corresponding dish photo on the restaurant’s ordering page; a different recipe or portion was not substituted."
+    },
+    {
+      "slug": "combo-1",
+      "name": "Combo 1",
+      "zomatoDishName": "Cheese Veggie Burger Combo",
+      "reason": "Corresponding listing has no item_image_url and an empty media array."
+    },
+    {
+      "slug": "combo-2",
+      "name": "Combo 2",
+      "zomatoDishName": "3 Pizza Combo",
+      "reason": "Corresponding listing has no item_image_url and an empty media array."
+    },
+    {
+      "slug": "combo-4",
+      "name": "Combo 4",
+      "zomatoDishName": "Set of 2 Pizza Combo",
+      "reason": "Corresponding listing has no item_image_url and an empty media array."
+    },
+    {
+      "slug": "combo-6",
+      "name": "Combo 6",
+      "zomatoDishName": "Aloo Tikki Burger Combo",
+      "reason": "Corresponding listing has no item_image_url and an empty media array."
+    },
+    {
+      "slug": "combo-7",
+      "name": "Combo 7",
+      "zomatoDishName": "Red Pepper Paneer Pizza Combo",
+      "reason": "Corresponding listing has no item_image_url and an empty media array."
+    },
+    {
+      "slug": "combo-8-friendship-combo",
+      "name": "Combo 8 · Friendship Combo",
+      "zomatoDishName": "Friendship Combo",
+      "reason": "Photo exists, but the online onion-paneer pizza and drink combo differs from the printed peri peri pizza combo."
+    },
+    {
+      "slug": "combo-10-party-pack",
+      "name": "Combo 10 · Party Pack",
+      "zomatoDishName": "5 Party Pack Pizza Combo",
+      "reason": "Corresponding listing has no item_image_url and an empty media array."
+    },
+    {
+      "slug": "garlic-bread-plain",
+      "name": "Garlic Bread Plain",
+      "reason": "No clear corresponding dish photo on the restaurant’s ordering page; a different recipe or portion was not substituted."
+    },
+    {
+      "slug": "masala-french-fries",
+      "name": "Masala French Fries",
+      "reason": "No clear corresponding dish photo on the restaurant’s ordering page; a different recipe or portion was not substituted."
+    },
+    {
+      "slug": "pizza-puff-3-pieces",
+      "name": "Pizza Puff (3 Pieces)",
+      "reason": "No clear corresponding dish photo on the restaurant’s ordering page; a different recipe or portion was not substituted."
+    },
+    {
+      "slug": "pocket-parcel",
+      "name": "Pocket Parcel",
+      "reason": "No clear corresponding dish photo on the restaurant’s ordering page; a different recipe or portion was not substituted."
+    },
+    {
+      "slug": "aloo-tikki-cheese-wrap",
+      "name": "Aloo Tikki Cheese Wrap",
+      "zomatoDishName": "Aloo Tikki Cheese Wrap",
+      "reason": "Corresponding listing has no item_image_url and an empty media array."
+    },
+    {
+      "slug": "chilli-fried-rice",
+      "name": "Chilli Fried Rice",
+      "reason": "No clear corresponding dish photo on the restaurant’s ordering page; a different recipe or portion was not substituted."
+    },
+    {
+      "slug": "mushroom-fried-rice",
+      "name": "Mushroom Fried Rice",
+      "reason": "No clear corresponding dish photo on the restaurant’s ordering page; a different recipe or portion was not substituted."
+    },
+    {
+      "slug": "pav-bhaji",
+      "name": "Pav Bhaji",
+      "reason": "No clear corresponding dish photo on the restaurant’s ordering page; a different recipe or portion was not substituted."
+    },
+    {
+      "slug": "extra-pav",
+      "name": "Extra Pav",
+      "reason": "No clear corresponding dish photo on the restaurant’s ordering page; a different recipe or portion was not substituted."
+    },
+    {
+      "slug": "extra-bhaji",
+      "name": "Extra Bhaji",
+      "reason": "No clear corresponding dish photo on the restaurant’s ordering page; a different recipe or portion was not substituted."
+    },
+    {
+      "slug": "jalapeno-cheese-dip",
+      "name": "Jalapeno Cheese Dip",
+      "zomatoDishName": "Jalapeno Cheese Dip",
+      "reason": "Corresponding listing has no item_image_url and an empty media array."
+    },
+    {
+      "slug": "orgeno-cheese-dip",
+      "name": "Orgeno Cheese Dip",
+      "zomatoDishName": "Oregano Cheese Dip",
+      "reason": "Corresponding listing has no item_image_url and an empty media array."
+    },
+    {
+      "slug": "thousand-dip",
+      "name": "Thousand Dip",
+      "reason": "No clear corresponding dish photo on the restaurant’s ordering page; a different recipe or portion was not substituted."
+    },
+    {
+      "slug": "peri-peri-dip",
+      "name": "Peri Peri Dip",
+      "reason": "No clear corresponding dish photo on the restaurant’s ordering page; a different recipe or portion was not substituted."
+    },
+    {
+      "slug": "fruit-juice",
+      "name": "Fruit Juice",
+      "zomatoDishName": "Fruit Juice",
+      "reason": "Corresponding listing has no item_image_url and an empty media array."
+    },
+    {
+      "slug": "rabdi-milk-shake",
+      "name": "Rabdi Milk Shake",
+      "zomatoDishName": "Rabadi Milk Shake",
+      "reason": "Corresponding listing has no item_image_url and an empty media array."
+    },
+    {
+      "slug": "mint-mojito",
+      "name": "Mint Mojito",
+      "zomatoDishName": "Mint Mojito Mocktail",
+      "reason": "Corresponding listing has no item_image_url and an empty media array."
+    },
+    {
+      "slug": "blue-berry-mojito",
+      "name": "Blue Berry Mojito",
+      "reason": "No clear corresponding dish photo on the restaurant’s ordering page; a different recipe or portion was not substituted."
+    },
+    {
+      "slug": "green-apple-mojito",
+      "name": "Green Apple Mojito",
+      "zomatoDishName": "Green Apple Mocktail",
+      "reason": "Corresponding listing has no item_image_url and an empty media array."
+    },
+    {
+      "slug": "hot-coffee",
+      "name": "Hot Coffee",
+      "zomatoDishName": "Hot Coffee",
+      "reason": "Listing image shows a bottled cold drink rather than a hot coffee serving."
+    },
+    {
+      "slug": "italian-red-pasta",
+      "name": "Italian Red Pasta",
+      "zomatoDishName": "Veg Italian Red Pasta",
+      "reason": "Corresponding photo contains visible Zomato branding and is excluded at the user’s request."
+    },
+    {
+      "slug": "italian-white-pasta",
+      "name": "Italian White Pasta",
+      "zomatoDishName": "Veg Italian White Pasta",
+      "reason": "Corresponding photo contains visible Zomato branding and is excluded at the user’s request."
+    },
+    {
+      "slug": "veg-fried-rice",
+      "name": "Veg Fried Rice",
+      "zomatoDishName": "Veg Fried Rice",
+      "reason": "Corresponding photo contains visible Zomato branding and is excluded at the user’s request."
+    },
+    {
+      "slug": "paneer-fried-rice",
+      "name": "Paneer Fried Rice",
+      "zomatoDishName": "Paneer Fried Rice",
+      "reason": "Corresponding photo contains visible Zomato branding and is excluded at the user’s request."
+    }
+  ],
+  "notes": [
+    "Simple Cheese matches Margherita Cheese Pizza: both describe mozzarella cheese.",
+    "Poney Achari matches Popeye Achari Pizza: same onion, capsicum, paneer, jalapeno, achari and mozzarella ingredients.",
+    "Printed Tanduri, Maxican, Panner, Vanila and Orgeno spellings are matched only where the underlying dish is clear.",
+    "Blue Carlo Mojito matches the Blue Curacao Mocktail listing photo, a clear spelling alias for the blue citrus drink.",
+    "Combo 3, Combo 5 and Combo 9 are matched by their exact pizza combinations. Friendship Combo is intentionally not matched: the printed ingredients differ from the online listing.",
+    "Some Zomato item listings reuse the same photograph across multiple named dishes. That source association is retained; these are not independently photographed servings for each size or topping configuration.",
+    "Hot Coffee is intentionally not matched: its online listing photo shows a bottled cold drink rather than a hot serving.",
+    "A second pass inspected matching item media as well as item_image_url. Aloo Tikki Cheese Wrap and Combo 1, 2, 4, 6, 7 and 10 have matching listing names or ingredients but no associated image.",
+    "User subsequently requested excluding every Zomato-watermarked photo. Italian red pasta, Italian white pasta, veg fried rice and paneer fried rice were removed from active mappings and local assets; neutral placeholders are used."
+  ],
+  "excludedPhotos": [
+    {
+      "slug": "italian-red-pasta",
+      "zomatoDishName": "Veg Italian Red Pasta",
+      "sourceImageUrl": "https://b.zmtcdn.com/data/dish_photos/495/527ac892c9cbf23f3b0f9e0a4a79d495.jpg",
+      "catalogueName": "Italian Red Pasta",
+      "reason": "Visible Zomato word/logo on a red table tag. Entire photo excluded at the user’s request; watermark was not altered or removed."
+    },
+    {
+      "slug": "italian-white-pasta",
+      "zomatoDishName": "Veg Italian White Pasta",
+      "sourceImageUrl": "https://b.zmtcdn.com/data/dish_photos/420/472ce2b5e275e8da8ab7cf83ea996420.jpg",
+      "catalogueName": "Italian White Pasta",
+      "reason": "Visible Zomato word/logo on a red table tag. Entire photo excluded at the user’s request; watermark was not altered or removed."
+    },
+    {
+      "slug": "veg-fried-rice",
+      "zomatoDishName": "Veg Fried Rice",
+      "sourceImageUrl": "https://b.zmtcdn.com/data/dish_photos/623/7a7a6be59d941f0a2b11f7aab3b90623.jpg",
+      "catalogueName": "Veg Fried Rice",
+      "reason": "Visible Zomato word/logo on a red table tag. Entire photo excluded at the user’s request; watermark was not altered or removed."
+    },
+    {
+      "slug": "paneer-fried-rice",
+      "zomatoDishName": "Paneer Fried Rice",
+      "sourceImageUrl": "https://b.zmtcdn.com/data/dish_photos/623/7a7a6be59d941f0a2b11f7aab3b90623.jpg",
+      "catalogueName": "Paneer Fried Rice",
+      "reason": "Visible Zomato word/logo on a red table tag. Entire photo excluded at the user’s request; watermark was not altered or removed."
+    }
+  ],
+  "watermarkAudit": {
+    "date": "2026-10-17",
+    "reviewedPhotos": 75,
+    "retainedPhotos": 71,
+    "excludedSlugs": [
+      "italian-red-pasta",
+      "italian-white-pasta",
+      "veg-fried-rice",
+      "paneer-fried-rice"
+    ],
+    "method": "Visual inspection of all downloaded photos in enlarged contact sheets, backed by macOS Vision OCR at the original downloaded resolution. Four images visibly contain the Zomato word/logo. No other retained image visibly contains it.",
+    "otherBranding": "Restaurant Hot Pizza Ace logos and Del Monte ketchup sachets were distinguished from Zomato branding."
+  }
+}

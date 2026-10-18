@@ -1,0 +1,124 @@
+.admin-product-views {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 17px 20px 0;
+}
+.admin-product-views button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 10px 13px;
+  background: #f6f7f1;
+  border: 1px solid #e6e9df;
+  border-radius: 7px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #68715d;
+}
+.admin-product-views button[aria-pressed='true'] {
+  color: #34452b;
+  border-color: #bdc9ad;
+  background: #eaf0e1;
+}
+.admin-product-views button span {
+  font-size: 10px;
+  padding: 2px 5px;
+  border-radius: 4px;
+  background: #ffffffb3;
+}
+.admin-deleted-note {
+  margin: 16px 20px 0;
+  color: #778269;
+  line-height: 1.6;
+  font-size: 11px;
+}
+.admin-product-action.admin-icon-link {
+  width: auto;
+  min-height: 32px;
+  height: auto;
+  padding: 7px 9px;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.admin-product-delete.admin-icon-link {
+  color: #b73d2e;
+  border-color: #efd3cc;
+}
+.admin-product-delete.admin-icon-link:hover {
+  background: #fff1ed;
+}
+.admin-categories-card .admin-category-action {
+  width: auto;
+  height: auto;
+  min-height: 36px;
+  padding: 7px 9px;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.admin-categories-card .admin-category-name strong,
+.admin-categories-card .admin-category-name small {
+  overflow-wrap: anywhere;
+}
+.admin-categories-card .admin-category-name .admin-category-protection {
+  color: #8a5b35;
+  line-height: 1.6;
+}
+.admin-categories-card .admin-row-actions {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.admin-category-views {
+  flex-wrap: wrap;
+}
+.admin-shell .admin-products-table .admin-product-action-cell {
+  position: sticky;
+  right: 0;
+  background: #fff;
+  box-shadow: -4px 0 8px #35432908;
+  z-index: 1;
+}
+.admin-shell .admin-products-table th.admin-product-action-cell {
+  background: #fcfcf8;
+  z-index: 2;
+}
+@media (max-width: 700px) {
+  .admin-categories-card .admin-category-list > div {
+    flex-wrap: wrap;
+  }
+  .admin-categories-card .admin-row-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+  .admin-categories-card .admin-row-actions .admin-icon-link {
+    min-width: 40px;
+    min-height: 40px;
+  }
+  .admin-product-views {
+    padding: 13px 13px 0;
+    gap: 7px;
+  }
+  .admin-product-views button {
+    flex: 1;
+    padding: 10px 8px;
+    font-size: 10px;
+    gap: 5px;
+  }
+  .admin-deleted-note {
+    margin-inline: 13px;
+    font-size: 10px;
+  }
+  .admin-product-action.admin-icon-link {
+    padding: 7px;
+  }
+  .admin-product-action.admin-icon-link svg {
+    display: none;
+  }
+  .admin-shell .admin-products-table td.admin-product-action-cell,
+  .admin-shell .admin-products-table th.admin-product-action-cell {
+    padding-inline: 10px;
+  }
+}
