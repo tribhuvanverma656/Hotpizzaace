@@ -1,0 +1,9 @@
+{
+  "appId": "com.foodordering.app",
+  "appName": "Food Ordering",
+  "webDir": "public",
+  "server": {
+    "url": "https://hotpizzaace.onrender.com",
+    "cleartext": true
+  }
+}
