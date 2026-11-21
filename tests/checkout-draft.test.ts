@@ -14,6 +14,15 @@ import {
   saveCheckoutDraft,
 } from '../lib/checkout-draft';
 import type { Customer, Order, SavedAddress } from '../types';
+import { initialOrders } from '../lib/data';
+import { cartMatchesPlacedOrder } from '../lib/commerce/client';
+import {
+  clearSharedCheckoutDraft,
+  loadSharedCheckoutDraft,
+  newSharedCheckoutDraft,
+  saveSharedCheckoutDraft,
+  sharedCheckoutDraftKey,
+} from '../lib/shared-checkout-draft';
 
 function memoryStorage() {
   const values = new Map<string, string>();
@@ -216,25 +225,104 @@ test('consuming a matching guest draft preserves other customers and branches', 
 
 test('completed cash and paid checkouts clear their draft while failed or unpaid retries retain theirs', () => {
   const storage = memoryStorage();
-  const states: Pick<Order, 'paymentMethod' | 'paymentStatus'>[] = [
-    { paymentMethod: 'cash', paymentStatus: 'pending' },
-    { paymentMethod: 'upi', paymentStatus: 'simulated_paid' },
-    { paymentMethod: 'card', paymentStatus: 'simulated_paid' },
-    { paymentMethod: 'upi', paymentStatus: 'initiated' },
-    { paymentMethod: 'card', paymentStatus: 'pending' },
-    { paymentMethod: 'upi', paymentStatus: 'failed' },
+  const states: (Pick<Order, 'paymentMethod' | 'paymentStatus' | 'paymentMode'> & {
+    completed: boolean;
+  })[] = [
+    { paymentMethod: 'cash', paymentStatus: 'pending', completed: true },
+    { paymentMethod: 'upi', paymentStatus: 'simulated_paid', completed: true },
+    {
+      paymentMethod: 'card',
+      paymentMode: 'simulation',
+      paymentStatus: 'simulated_paid',
+      completed: true,
+    },
+    { paymentMethod: 'upi', paymentMode: 'razorpay_test', paymentStatus: 'paid', completed: true },
+    { paymentMethod: 'card', paymentMode: 'razorpay_live', paymentStatus: 'paid', completed: true },
+    {
+      paymentMethod: 'upi',
+      paymentMode: 'razorpay_test',
+      paymentStatus: 'initiated',
+      completed: false,
+    },
+    {
+      paymentMethod: 'card',
+      paymentMode: 'razorpay_live',
+      paymentStatus: 'failed',
+      completed: false,
+    },
+    {
+      paymentMethod: 'upi',
+      paymentMode: 'razorpay_live',
+      paymentStatus: 'simulated_paid',
+      completed: false,
+    },
+    { paymentMethod: 'upi', paymentMode: 'simulation', paymentStatus: 'paid', completed: false },
+    { paymentMethod: 'card', paymentStatus: 'paid', completed: false },
+    { paymentMethod: 'card', paymentStatus: 'pending', completed: false },
+    { paymentMethod: 'upi', paymentStatus: 'failed', completed: false },
   ];
-  for (const order of states) {
+  for (const { completed, ...order } of states) {
     const draft = {
       ...initializeCheckoutDraft(scope, null),
       customer,
       paymentMethod: order.paymentMethod,
     };
     saveCheckoutDraft(storage, scope, draft);
-    const completed = order.paymentMethod === 'cash' || order.paymentStatus === 'simulated_paid';
     assert.equal(isCompletedCheckout(order), completed);
     if (isCompletedCheckout(order)) clearCheckoutDraft(storage, scope);
     assert.deepEqual(loadCheckoutDraft(storage, scope), completed ? null : draft);
+  }
+});
+
+test('an already-captured shared checkout response retires the saved draft and attempt while preserving a changed cart', () => {
+  const account = { branchId: 'barra', userId: 'checkout-customer' };
+  const other = { ...account, branchId: 'other-branch' };
+  for (const paymentMode of ['razorpay_test', 'razorpay_live'] as const) {
+    for (const paymentReviewRequired of [false, true]) {
+      const storage = memoryStorage();
+      saveSharedCheckoutDraft(storage, account, newSharedCheckoutDraft(account));
+      saveSharedCheckoutDraft(storage, other, newSharedCheckoutDraft(other));
+      const attemptKey = `${sharedCheckoutDraftKey(account)}:attempt`;
+      storage.setItem(
+        attemptKey,
+        JSON.stringify({ key: 'idempotent-checkout', orderId: 'paid-order' }),
+      );
+      // The server may return this same captured receipt when a create response was
+      // lost and checkout is submitted again with its saved idempotency key.
+      const paid: Order = {
+        ...structuredClone(initialOrders[0]),
+        id: 'paid-order',
+        branchId: account.branchId,
+        paymentMethod: 'upi',
+        paymentMode,
+        paymentStatus: 'paid',
+        paymentReviewRequired,
+      };
+      const snapshot = structuredClone(paid);
+      assert.equal(isCompletedCheckout(paid), true);
+      clearSharedCheckoutDraft(storage, account);
+      assert.equal(loadSharedCheckoutDraft(storage, account), null);
+      assert.equal(storage.getItem(attemptKey), null);
+      assert.ok(loadSharedCheckoutDraft(storage, other));
+      const cart = paid.items.map((item) => ({
+        id: item.id,
+        productId: item.productId,
+        quantity: item.quantity,
+        toppingIds: [],
+        notes: '',
+      }));
+      assert.equal(cartMatchesPlacedOrder(cart, paid, account.branchId), true);
+      assert.equal(
+        cartMatchesPlacedOrder(
+          [{ ...cart[0], quantity: cart[0].quantity + 1 }],
+          paid,
+          account.branchId,
+        ),
+        false,
+      );
+      assert.equal(cartMatchesPlacedOrder(cart, paid, other.branchId), false);
+      assert.deepEqual(paid, snapshot);
+    }
   }
 });
 

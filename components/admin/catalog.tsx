@@ -14,13 +14,14 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useDemoStore } from '@/lib/store';
+import { useAdminStore } from '@/components/admin/use-admin-store';
 import { money } from '@/lib/utils';
 import type { Category, Product } from '@/types';
 import { ConfirmAction, PageHeading } from './shared';
 import './catalog.css';
 
 export function ProductsPage() {
-  const { products, categories, archiveProduct, saveProduct } = useDemoStore();
+  const { products, categories, archiveProduct, saveProduct } = useAdminStore();
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('all');
   const [availability, setAvailability] = useState('all');
@@ -35,7 +36,7 @@ export function ProductsPage() {
       (availability === 'all' || p.available === (availability === 'available')) &&
       p.name.toLowerCase().includes(search.toLowerCase()),
   );
-  const restore = (product: Product, available = false) => {
+  const restore = async (product: Product, available = false) => {
     try {
       const current = useDemoStore.getState().products.find((p) => p.id === product.id);
       if (!current) throw new Error('This product could not be found.');
@@ -43,7 +44,7 @@ export function ProductsPage() {
         throw new Error(
           'Use Edit to choose an active category, then save to restore this product.',
         );
-      saveProduct({ ...current, archived: false, available });
+      await saveProduct({ ...current, archived: false, available });
       toast.success(
         available
           ? 'Product restored to the menu'
@@ -250,11 +251,11 @@ export function ProductsPage() {
         description="This item will be removed from the customer menu. You can restore it from Deleted items. Existing orders and receipts will be kept."
         destructive
         label="Delete product"
-        onConfirm={() => {
+        onConfirm={async () => {
           if (deleting) {
             try {
               const original = deleting;
-              archiveProduct(original.id);
+              await archiveProduct(original.id);
               toast.success('Product deleted. Find it in Deleted items.', {
                 action: { label: 'Undo', onClick: () => restore(original, original.available) },
               });
@@ -269,8 +270,17 @@ export function ProductsPage() {
 }
 
 export function CategoriesPage() {
-  const { categories, products, saveCategory, archiveCategory, deleteCategory, reorderCategory } =
-    useDemoStore();
+  const {
+    categories,
+    products,
+    saveCategory,
+    archiveCategory,
+    deleteCategory,
+    reorderCategory,
+    shared,
+    saving,
+  } = useAdminStore();
+  const [originalRevision, setOriginalRevision] = useState(shared.revision);
   const [editing, setEditing] = useState<Category | null>(null);
   const [name, setName] = useState('');
   const [slug, setSlug] = useState('');
@@ -282,6 +292,7 @@ export function CategoriesPage() {
   const archived = categories.filter((c) => c.archived).sort((a, b) => a.sortOrder - b.sortOrder);
   const visible = view === 'active' ? active : archived;
   const reset = () => {
+    setOriginalRevision(shared.revision);
     setEditing(null);
     setName('');
     setSlug('');
@@ -293,11 +304,11 @@ export function CategoriesPage() {
       .trim()
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-|-$/g, '');
-  const restore = (id: string) => {
+  const restore = async (id: string) => {
     try {
       const category = useDemoStore.getState().categories.find((item) => item.id === id);
       if (!category) throw new Error('This category could not be found.');
-      saveCategory({ ...category, archived: false });
+      await saveCategory({ ...category, archived: false });
       toast.success(`${category.name} restored to Active categories.`);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Unable to restore category');
@@ -374,9 +385,17 @@ export function CategoriesPage() {
                           className="admin-icon-link"
                           disabled={index === 0}
                           aria-label={`Move ${c.name} up`}
-                          onClick={() => {
-                            reorderCategory(c.id, 'up');
-                            toast.success('Category order updated');
+                          onClick={async () => {
+                            try {
+                              await reorderCategory(c.id, 'up');
+                              toast.success('Category order updated');
+                            } catch (cause) {
+                              toast.error(
+                                cause instanceof Error
+                                  ? cause.message
+                                  : 'Unable to reorder categories',
+                              );
+                            }
                           }}
                         >
                           <ArrowUp size={16} />
@@ -386,9 +405,17 @@ export function CategoriesPage() {
                           className="admin-icon-link"
                           disabled={index === active.length - 1}
                           aria-label={`Move ${c.name} down`}
-                          onClick={() => {
-                            reorderCategory(c.id, 'down');
-                            toast.success('Category order updated');
+                          onClick={async () => {
+                            try {
+                              await reorderCategory(c.id, 'down');
+                              toast.success('Category order updated');
+                            } catch (cause) {
+                              toast.error(
+                                cause instanceof Error
+                                  ? cause.message
+                                  : 'Unable to reorder categories',
+                              );
+                            }
                           }}
                         >
                           <ArrowDown size={16} />
@@ -398,6 +425,7 @@ export function CategoriesPage() {
                           className="admin-icon-link admin-category-action"
                           aria-label={`Edit ${c.name}`}
                           onClick={() => {
+                            setOriginalRevision(shared.revision);
                             setEditing(c);
                             setName(c.name);
                             setSlug(c.slug);
@@ -471,7 +499,7 @@ export function CategoriesPage() {
           </div>
           <form
             className="admin-form admin-card-padding"
-            onSubmit={(e) => {
+            onSubmit={async (e) => {
               e.preventDefault();
               const cleanSlug = makeSlug(slug);
               if (name.trim().length < 2) {
@@ -487,14 +515,17 @@ export function CategoriesPage() {
                 return;
               }
               try {
-                saveCategory({
-                  id: editing?.id || crypto.randomUUID(),
-                  name: name.trim(),
-                  slug: cleanSlug,
-                  sortOrder:
-                    editing?.sortOrder ?? Math.max(-1, ...categories.map((c) => c.sortOrder)) + 1,
-                  archived: false,
-                });
+                await saveCategory(
+                  {
+                    id: editing?.id || crypto.randomUUID(),
+                    name: name.trim(),
+                    slug: cleanSlug,
+                    sortOrder:
+                      editing?.sortOrder ?? Math.max(-1, ...categories.map((c) => c.sortOrder)) + 1,
+                    archived: false,
+                  },
+                  editing ? originalRevision : shared.revision,
+                );
                 toast.success(editing ? 'Category updated' : 'Category created');
                 reset();
                 setView('active');
@@ -531,7 +562,7 @@ export function CategoriesPage() {
                 {error}
               </p>
             )}
-            <button className="btn btn-primary" type="submit">
+            <button className="btn btn-primary" type="submit" disabled={saving}>
               {editing ? 'Save changes' : 'Create category'}
             </button>
             {editing && (
@@ -555,10 +586,10 @@ export function CategoriesPage() {
         description="This unused category will be removed completely. It will no longer appear in Archived categories and cannot be restored. Existing products and order receipts will be kept."
         destructive
         label="Delete permanently"
-        onConfirm={() => {
+        onConfirm={async () => {
           if (!deleting) return;
           try {
-            deleteCategory(deleting.id);
+            await deleteCategory(deleting.id);
             if (editing?.id === deleting.id) reset();
             toast.success(`${deleting.name} permanently deleted.`);
           } catch (err) {
@@ -575,10 +606,10 @@ export function CategoriesPage() {
         description="This category will be hidden from the customer menu. You can restore it from Archived categories. Previous orders and receipts are kept."
         destructive
         label="Archive category"
-        onConfirm={() => {
+        onConfirm={async () => {
           if (archive) {
             try {
-              archiveCategory(archive.id);
+              await archiveCategory(archive.id);
               if (editing?.id === archive.id) reset();
               const archivedId = archive.id;
               toast.success('Category archived. Find it in Archived categories.', {

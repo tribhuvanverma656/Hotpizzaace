@@ -1,11 +1,11 @@
 'use client';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import { ArrowLeft, ImagePlus, Plus, Trash2, Save } from 'lucide-react';
+import { ArrowLeft, ImagePlus, Plus, Trash2, Save, LoaderCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Product, Option } from '@/types';
-import { useDemoStore } from '@/lib/store';
+import { useAdminStore } from '@/components/admin/use-admin-store';
 import { PageHeading } from './shared';
 
 type OptionDraft = {
@@ -14,8 +14,11 @@ type OptionDraft = {
   rupees: string;
   sizePrices?: Record<string, string>;
 };
-type Draft = Omit<Product, 'price' | 'sizes' | 'crusts' | 'toppings'> & {
+type Draft = Omit<Product, 'price' | 'sizes' | 'crusts' | 'toppings' | 'gstInclusive'> & {
   rupees: string;
+  gstInclusiveEnabled: boolean;
+  gstRatePercent: string;
+  gstCode: string;
   sizes: OptionDraft[];
   crusts: OptionDraft[];
   toppings: OptionDraft[];
@@ -46,6 +49,7 @@ function OptionEditor({
   onChange,
   defaultPrice = '0',
   sizes = [],
+  disableAdd = false,
 }: {
   title: string;
   description: string;
@@ -53,6 +57,7 @@ function OptionEditor({
   onChange: (options: OptionDraft[]) => void;
   defaultPrice?: string;
   sizes?: OptionDraft[];
+  disableAdd?: boolean;
 }) {
   return (
     <section className="admin-card admin-section-gap">
@@ -64,6 +69,7 @@ function OptionEditor({
         <button
           type="button"
           className="btn btn-outline admin-small-btn"
+          disabled={disableAdd}
           onClick={() =>
             onChange([
               ...options,
@@ -205,40 +211,52 @@ function OptionEditor({
 
 export function ProductForm({ isNew = false }: { isNew?: boolean }) {
   const { id } = useParams<{ id: string }>();
-  const { products, categories, saveProduct } = useDemoStore();
+  const { products, categories, saveProduct, shared, saving } = useAdminStore();
   const router = useRouter();
+  const [originalRevision] = useState(shared.revision);
   const original = products.find((p) => p.id === id);
-  const [draft, setDraft] = useState<Draft>(() =>
-    original
-      ? {
-          ...original,
-          rupees: String(original.price / 100),
-          sizes: optionsToDraft(original.sizes),
-          crusts: optionsToDraft(original.crusts),
-          toppings: optionsToDraft(original.toppings),
-        }
-      : {
-          id: crypto.randomUUID(),
-          name: '',
-          slug: '',
-          description: '',
-          image: '',
-          categoryId: categories.find((c) => !c.archived)?.id || '',
-          vegetarian: true,
-          available: true,
-          featured: false,
-          bestseller: false,
-          rupees: '',
-          sizes: [],
-          crusts: [],
-          toppings: [],
-          badge: '',
-          archived: false,
-        },
-  );
+  const [draft, setDraft] = useState<Draft>(() => {
+    if (original) {
+      const { gstInclusive, ...product } = original;
+      return {
+        ...product,
+        rupees: String(original.price / 100),
+        gstInclusiveEnabled: !!gstInclusive,
+        gstRatePercent: gstInclusive ? String(gstInclusive.rateBps / 100) : '',
+        gstCode: gstInclusive?.code ?? '',
+        sizes: optionsToDraft(original.sizes),
+        crusts: optionsToDraft(original.crusts),
+        toppings: optionsToDraft(original.toppings),
+      };
+    }
+    return {
+      id: crypto.randomUUID(),
+      name: '',
+      slug: '',
+      description: '',
+      image: '',
+      categoryId: categories.find((c) => !c.archived)?.id || '',
+      vegetarian: true,
+      available: true,
+      featured: false,
+      bestseller: false,
+      rupees: '',
+      gstInclusiveEnabled: false,
+      gstRatePercent: '',
+      gstCode: '',
+      sizes: [],
+      crusts: [],
+      toppings: [],
+      badge: '',
+      archived: false,
+    };
+  });
   const [error, setError] = useState('');
   const [imageError, setImageError] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const submissionInFlight = useRef(false);
+  const busy = submitting || saving;
   const set = <K extends keyof Draft>(key: K, value: Draft[K]) =>
     setDraft((prev) => ({ ...prev, [key]: value }));
   if (!isNew && !original)
@@ -250,8 +268,9 @@ export function ProductForm({ isNew = false }: { isNew?: boolean }) {
         </Link>
       </div>
     );
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (submissionInFlight.current || saving || uploading) return;
     setError('');
     if (draft.name.trim().length < 2 || draft.description.trim().length < 10) {
       setError(
@@ -279,6 +298,34 @@ export function ProductForm({ isNew = false }: { isNew?: boolean }) {
     if (!Number.isFinite(price) || price <= 0 || price > 100000) {
       setError('Base price must be between ₹0.01 and ₹1,00,000.');
       return;
+    }
+    let gstInclusive: Product['gstInclusive'];
+    if (draft.gstInclusiveEnabled) {
+      const rateText = draft.gstRatePercent.trim();
+      const [whole, fraction = ''] = rateText.split('.');
+      const rateBps = Number(whole) * 100 + Number(fraction.padEnd(2, '0'));
+      if (
+        !/^\d{1,2}(?:\.\d{1,2})?$/.test(rateText) ||
+        !Number.isSafeInteger(rateBps) ||
+        rateBps < 1 ||
+        rateBps > 4000 ||
+        rateBps % 2 !== 0
+      ) {
+        setError('Enter the total GST rate from 0.02% to 40%, in increments of 0.02%.');
+        return;
+      }
+      const code = draft.gstCode.trim();
+      if (!/^(?:\d{4}|\d{6}|\d{8})$/.test(code)) {
+        setError('Enter the applicable HSN / SAC code using 4, 6 or 8 digits.');
+        return;
+      }
+      if (draft.crusts.length || draft.toppings.length) {
+        setError(
+          'Remove crusts and toppings before using a price that includes GST. Sizes may have their own final MRP.',
+        );
+        return;
+      }
+      gstInclusive = { rateBps, code };
     }
     const slug = makeSlug(draft.slug);
     if (!slug || products.some((p) => p.slug === slug && p.id !== draft.id)) {
@@ -328,30 +375,47 @@ export function ProductForm({ isNew = false }: { isNew?: boolean }) {
             }
           : {}),
       }));
+    submissionInFlight.current = true;
+    setSubmitting(true);
+    const toastId = `product-save-${draft.id}`;
+    toast.loading(isNew ? 'Creating product…' : 'Saving product…', { id: toastId });
     try {
-      const { rupees, ...fields } = draft;
+      const { rupees, gstInclusiveEnabled, gstRatePercent, gstCode, ...fields } = draft;
       void rupees;
-      saveProduct({
-        ...fields,
-        archived: false,
-        name: draft.name.trim(),
-        slug,
-        description: draft.description.trim(),
-        price: Math.round(price * 100),
-        sizes: convert(draft.sizes),
-        crusts: convert(draft.crusts),
-        toppings: convert(draft.toppings),
-      });
+      void gstInclusiveEnabled;
+      void gstRatePercent;
+      void gstCode;
+      await saveProduct(
+        {
+          ...fields,
+          archived: false,
+          name: draft.name.trim(),
+          slug,
+          description: draft.description.trim(),
+          price: Math.round(price * 100),
+          sizes: convert(draft.sizes),
+          crusts: convert(draft.crusts),
+          toppings: convert(draft.toppings),
+          ...(gstInclusive ? { gstInclusive } : {}),
+        },
+        originalRevision,
+      );
       toast.success(
         isNew
           ? 'Product added to your menu'
           : original?.archived
             ? 'Product restored'
             : 'Product updated',
+        { id: toastId },
       );
       router.push('/admin/products');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not save this product.');
+      const message = err instanceof Error ? err.message : 'Could not save this product.';
+      setError(message);
+      toast.error(message, { id: toastId });
+    } finally {
+      submissionInFlight.current = false;
+      setSubmitting(false);
     }
   };
   return (
@@ -374,7 +438,10 @@ export function ProductForm({ isNew = false }: { isNew?: boolean }) {
           and turn on “Available to order” when it is ready to sell.
         </p>
       )}
-      <form className="admin-form" onSubmit={submit}>
+      <form className="admin-form" onSubmit={submit} aria-busy={busy}>
+        <p className="sr-only" role="status">
+          {busy ? 'Saving your product. Please wait.' : ''}
+        </p>
         <div className="admin-product-form-grid">
           <div>
             <section className="admin-card">
@@ -437,7 +504,7 @@ export function ProductForm({ isNew = false }: { isNew?: boolean }) {
                 </label>
                 <div className="form-grid">
                   <label className="field">
-                    Base price (₹) *
+                    {draft.gstInclusiveEnabled ? 'Final price / MRP (₹) *' : 'Base price (₹) *'}
                     <input
                       required
                       type="number"
@@ -470,6 +537,54 @@ export function ProductForm({ isNew = false }: { isNew?: boolean }) {
                 <label className="admin-checkbox">
                   <input
                     type="checkbox"
+                    checked={draft.gstInclusiveEnabled}
+                    onChange={(event) => set('gstInclusiveEnabled', event.target.checked)}
+                  />
+                  <span>
+                    MRP / GST included in price
+                    <small>
+                      Use for a packaged item whose listed selling price already includes GST.
+                    </small>
+                  </span>
+                </label>
+                {draft.gstInclusiveEnabled && (
+                  <>
+                    <div className="form-grid">
+                      <label className="field">
+                        Total GST rate (%) *
+                        <input
+                          required
+                          type="number"
+                          min="0.02"
+                          max="40"
+                          step="0.02"
+                          value={draft.gstRatePercent}
+                          onChange={(event) => set('gstRatePercent', event.target.value)}
+                        />
+                      </label>
+                      <label className="field">
+                        HSN / SAC code *
+                        <input
+                          required
+                          inputMode="numeric"
+                          pattern="(?:[0-9]{4}|[0-9]{6}|[0-9]{8})"
+                          maxLength={8}
+                          value={draft.gstCode}
+                          onChange={(event) => set('gstCode', event.target.value)}
+                        />
+                      </label>
+                    </div>
+                    <p className="muted">
+                      Enter the correct tax rate and classification for this item. GST is split
+                      equally into CGST and SGST within the listed price. Set each size to its final
+                      selling price, at or below the printed MRP. Crusts and toppings are
+                      unavailable.
+                    </p>
+                  </>
+                )}
+                <label className="admin-checkbox">
+                  <input
+                    type="checkbox"
                     checked={draft.vegetarian}
                     onChange={(e) => set('vegetarian', e.target.checked)}
                   />
@@ -482,7 +597,11 @@ export function ProductForm({ isNew = false }: { isNew?: boolean }) {
             <OptionEditor
               defaultPrice={draft.rupees || '0'}
               title="Sizes"
-              description="Each size uses a full price. The first size matches the base price."
+              description={
+                draft.gstInclusiveEnabled
+                  ? 'Each size uses its final selling price including GST. The first size matches the base price.'
+                  : 'Each size uses a full price. The first size matches the base price.'
+              }
               options={draft.sizes}
               onChange={(options) => {
                 set('sizes', options);
@@ -491,6 +610,7 @@ export function ProductForm({ isNew = false }: { isNew?: boolean }) {
             />
             <OptionEditor
               title="Crusts"
+              disableAdd={draft.gstInclusiveEnabled}
               sizes={draft.sizes}
               description="Additional charges added to the base or size price."
               options={draft.crusts}
@@ -498,6 +618,7 @@ export function ProductForm({ isNew = false }: { isNew?: boolean }) {
             />
             <OptionEditor
               title="Toppings & extras"
+              disableAdd={draft.gstInclusiveEnabled}
               sizes={draft.sizes}
               description="Customers may select multiple extras. Prices are per item."
               options={draft.toppings}
@@ -526,41 +647,45 @@ export function ProductForm({ isNew = false }: { isNew?: boolean }) {
                     </div>
                   )}
                 </div>
-                <label className="btn btn-outline admin-upload-label">
-                  <ImagePlus size={16} />
-                  {uploading ? 'Reading image…' : 'Upload image'}
-                  <input
-                    type="file"
-                    accept="image/jpeg,image/png,image/webp"
-                    className="sr-only"
-                    disabled={uploading}
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (!file) return;
-                      if (
-                        !['image/jpeg', 'image/png', 'image/webp'].includes(file.type) ||
-                        file.size > 1500000
-                      ) {
-                        toast.error('Use a JPG, PNG, or WebP image under 1.5 MB.');
-                        return;
-                      }
-                      setUploading(true);
-                      const reader = new FileReader();
-                      reader.onload = () => {
-                        set('image', String(reader.result));
-                        setImageError(false);
-                        setUploading(false);
-                      };
-                      reader.onerror = () => {
-                        toast.error('Could not read image');
-                        setUploading(false);
-                      };
-                      reader.readAsDataURL(file);
-                    }}
-                  />
-                </label>
+                {!shared.enabled && (
+                  <label className="btn btn-outline admin-upload-label">
+                    <ImagePlus size={16} />
+                    {uploading ? 'Reading image…' : 'Upload image'}
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      className="sr-only"
+                      disabled={uploading}
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        if (
+                          !['image/jpeg', 'image/png', 'image/webp'].includes(file.type) ||
+                          file.size > 1500000
+                        ) {
+                          toast.error('Use a JPG, PNG, or WebP image under 1.5 MB.');
+                          return;
+                        }
+                        setUploading(true);
+                        const reader = new FileReader();
+                        reader.onload = () => {
+                          set('image', String(reader.result));
+                          setImageError(false);
+                          setUploading(false);
+                        };
+                        reader.onerror = () => {
+                          toast.error('Could not read image');
+                          setUploading(false);
+                        };
+                        reader.readAsDataURL(file);
+                      }}
+                    />
+                  </label>
+                )}
                 <small className="muted">
-                  JPG, PNG, WebP · max 1.5 MB. Stored locally in this demo.
+                  {shared.enabled
+                    ? 'Images are saved with the shared menu. Use a public HTTPS image URL.'
+                    : 'JPG, PNG, WebP · max 1.5 MB. Stored locally in this demo.'}
                 </small>
                 <label className="field">
                   Or use an image URL
@@ -613,7 +738,9 @@ export function ProductForm({ isNew = false }: { isNew?: boolean }) {
               </div>
             </section>
             <div className="admin-inline-note admin-section-gap">
-              Printed menu. Saving updates this browser’s storefront immediately.
+              {shared.enabled
+                ? 'Saving updates the shared menu for every connected device.'
+                : 'Printed menu. Saving updates this browser’s storefront immediately.'}
             </div>
           </div>
         </div>
@@ -626,9 +753,26 @@ export function ProductForm({ isNew = false }: { isNew?: boolean }) {
           <Link href="/admin/products" className="btn btn-outline">
             Cancel
           </Link>
-          <button type="submit" className="btn btn-primary" disabled={uploading}>
-            <Save size={16} />
-            {isNew ? 'Create product' : original?.archived ? 'Restore product' : 'Save changes'}
+          <button
+            type="submit"
+            className="btn btn-primary"
+            disabled={busy || uploading}
+            aria-busy={busy}
+          >
+            {busy ? (
+              <LoaderCircle size={16} className="spin" aria-hidden="true" />
+            ) : (
+              <Save size={16} aria-hidden="true" />
+            )}
+            {busy
+              ? isNew
+                ? 'Creating…'
+                : 'Saving…'
+              : isNew
+                ? 'Create product'
+                : original?.archived
+                  ? 'Restore product'
+                  : 'Save changes'}
           </button>
         </div>
       </form>

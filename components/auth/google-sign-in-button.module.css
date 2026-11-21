@@ -1,0 +1,61 @@
+@font-face {
+  font-family: 'Google Sans';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/fonts/google-sans-latin-500.woff2') format('woff2');
+}
+
+.button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 48px;
+  padding: 12px;
+  border: 1px solid #747775;
+  border-radius: 24px;
+  background: #fff;
+  color: #1f1f1f;
+  font-family: 'Google Sans', Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  cursor: pointer;
+  transition: box-shadow 0.2s;
+}
+
+.button img {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
+.button:hover:not(:disabled) {
+  box-shadow: 0 1px 4px #1f1f1f24;
+}
+
+.button:focus-visible {
+  outline: 3px solid #4285f4;
+  outline-offset: 3px;
+}
+
+.button:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+.legal {
+  margin: 14px 0 0;
+  color: #66685f;
+  font-size: 12px;
+  line-height: 1.7;
+  text-align: center;
+}
+
+.legal a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}

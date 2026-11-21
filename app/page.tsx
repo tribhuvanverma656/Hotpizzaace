@@ -21,7 +21,7 @@ export default function Home() {
         <div className="container hero-grid">
           <div className="hero-copy">
             <span className="hero-kicker">
-              <Flame size={14} /> A LITTLE HEAT. A WHOLE LOT OF HAPPY.
+              <Flame size={14} /> FRESHLY PREPARED AT HOT PIZZA ACE
             </span>
             <h1>
               Life’s better
@@ -31,8 +31,8 @@ export default function Home() {
             </h1>
             <p>
               Fresh dough. Bold toppings. That perfect cheese pull.
-              <br className="desktop-break" /> Your favourite kind of happiness, straight from our
-              oven.
+              <br className="desktop-break" /> Choose your pizza, add your sides and order for
+              delivery or pickup.
             </p>
             <div className="hero-actions">
               <Link href="/menu" className="btn btn-primary btn-large">
@@ -97,7 +97,7 @@ export default function Home() {
         <span>✳</span>
         <span>BIG FLAVOURS</span>
         <span>✳</span>
-        <span>ZERO BORING BITES</span>
+        <span>PIZZA, SIDES & DRINKS</span>
         <span>✳</span>
         <span>GOOD FOOD</span>
         <span>✳</span>
@@ -109,9 +109,9 @@ export default function Home() {
           <div>
             <span className="offer-eyebrow">MORE TO SHARE. MORE TO LOVE.</span>
             <h2>
-              Bring the gang.
+              A meal to share.
               <br />
-              We’ll bring <em>the good stuff.</em>
+              Find your <em>favourite combo.</em>
             </h2>
             <p>
               Pizza, sides, and something fizzy. Find your perfect

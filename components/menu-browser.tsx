@@ -1,26 +1,15 @@
 'use client';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import {
-  ArrowUpRight,
-  Pizza,
-  Sandwich,
-  Flame,
-  CupSoda,
-  UtensilsCrossed,
-  Package,
-  Search,
-  Plus,
-  Minus,
-  Leaf,
-} from 'lucide-react';
+import { ArrowUpRight, Star, Search, Plus, Minus, Leaf } from 'lucide-react';
 import { toast } from 'sonner';
 import { useDemoStore } from '@/lib/store';
 import { Product } from '@/types';
 import { money } from '@/lib/utils';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { ProductCustomizer } from './product-customizer';
-const icons = [Pizza, Pizza, UtensilsCrossed, Sandwich, Flame, CupSoda, Package];
+import { ProductImage } from './product-image';
+import { FoodCategoryIcon } from './food-category-icon';
 export function ProductCard({
   product,
   onCustomize,
@@ -28,13 +17,17 @@ export function ProductCard({
   product: Product;
   onCustomize: (p: Product) => void;
 }) {
+  const categories = useDemoStore((state) => state.categories);
   const cart = useDemoStore((state) => state.cart);
   const addToCart = useDemoStore((state) => state.addToCart);
   const updateQuantity = useDemoStore((state) => state.updateQuantity);
   const configurations = cart.filter((item) => item.productId === product.id);
   const quantity = configurations.reduce((sum, item) => sum + item.quantity, 0);
   const lastConfiguration = () =>
-    useDemoStore.getState().cart.filter((item) => item.productId === product.id).at(-1);
+    useDemoStore
+      .getState()
+      .cart.filter((item) => item.productId === product.id)
+      .at(-1);
   const configurable =
     product.sizes.length > 0 || product.crusts.length > 0 || product.toppings.length > 0;
   const unavailable = !product.available || product.archived;
@@ -72,7 +65,11 @@ export function ProductCard({
   return (
     <article className={`product-card ${unavailable ? 'unavailable' : ''}`}>
       <Link href={`/menu/${product.slug}`} className="product-photo">
-        <img src={product.image} alt={product.name} loading="lazy" />
+        <ProductImage
+          src={product.image}
+          alt={product.name}
+          sizes="(max-width: 700px) 80px, (max-width: 1150px) 45vw, 300px"
+        />
         <span
           className={`diet-mark ${product.vegetarian ? 'veg' : 'nonveg'}`}
           title={product.vegetarian ? 'Vegetarian' : 'Non-vegetarian'}
@@ -81,7 +78,14 @@ export function ProductCard({
         </span>
         {(product.badge || product.bestseller) && (
           <span className="photo-tag">
-            <Flame size={12} />
+            {product.bestseller ? (
+              <Star size={12} />
+            ) : (
+              <FoodCategoryIcon
+                category={categories.find((c) => c.id === product.categoryId)}
+                size={14}
+              />
+            )}
             {product.badge || 'BESTSELLER'}
           </span>
         )}
@@ -159,7 +163,7 @@ export function ProductCard({
   );
 }
 export function MenuBrowser({ home = false }: { home?: boolean }) {
-  const { products, categories } = useDemoStore();
+  const { products, categories, settings } = useDemoStore();
   const [category, setCategory] = useState('all');
   const [search, setSearch] = useState('');
   const [veg, setVeg] = useState(false);
@@ -188,7 +192,13 @@ export function MenuBrowser({ home = false }: { home?: boolean }) {
       <div className={home ? 'container' : 'container menu-layout'}>
         <div className="section-heading">
           <div>
-            <span className="eyebrow">MADE TO HIT THE SPOT</span>
+            <span className="eyebrow">EXPLORE OUR MENU</span>
+            {settings.billing && (
+              <p className="muted">
+                GST is itemized at checkout. Any GST already included in an item’s price is not
+                added again.
+              </p>
+            )}
             <h2>
               {home ? (
                 <>
@@ -196,7 +206,7 @@ export function MenuBrowser({ home = false }: { home?: boolean }) {
                 </>
               ) : (
                 <>
-                  Big cravings. <em>Great choices.</em>
+                  Your favourites, <em>freshly prepared.</em>
                 </>
               )}
             </h2>
@@ -206,7 +216,7 @@ export function MenuBrowser({ home = false }: { home?: boolean }) {
               Explore full menu <ArrowUpRight size={18} />
             </Link>
           ) : (
-            <span className="menu-count">{visible.length} delicious possibilities</span>
+            <span className="menu-count">{visible.length} menu items</span>
           )}
         </div>
         <div className={home ? 'home-menu-navigation' : 'menu-navigation'}>
@@ -217,15 +227,14 @@ export function MenuBrowser({ home = false }: { home?: boolean }) {
               className={category === 'all' ? 'category active' : 'category'}
             >
               <span>
-                <Pizza size={24} />
+                <FoodCategoryIcon />
               </span>
-              All favourites
+              All items
             </button>
             {categories
               .filter((c) => !c.archived)
               .sort((a, b) => a.sortOrder - b.sortOrder)
-              .map((c, i) => {
-                const Icon = icons[i % icons.length];
+              .map((c) => {
                 return (
                   <button
                     key={c.id}
@@ -234,7 +243,7 @@ export function MenuBrowser({ home = false }: { home?: boolean }) {
                     aria-pressed={category === c.id}
                   >
                     <span>
-                      <Icon size={24} />
+                      <FoodCategoryIcon category={c} />
                     </span>
                     {c.name}
                   </button>
@@ -250,7 +259,7 @@ export function MenuBrowser({ home = false }: { home?: boolean }) {
                   value={category}
                   onChange={(event) => setCategory(event.target.value)}
                 >
-                  <option value="all">All favourites</option>
+                  <option value="all">All items</option>
                   {categories
                     .filter((item) => !item.archived)
                     .sort((a, b) => a.sortOrder - b.sortOrder)
@@ -291,8 +300,8 @@ export function MenuBrowser({ home = false }: { home?: boolean }) {
           </div>
         ) : (
           <div className="empty-state">
-            <Pizza size={38} />
-            <h3>No bites found here</h3>
+            <FoodCategoryIcon size={38} />
+            <h3>No dishes found</h3>
             <p>Try a different category or search.</p>
             <button
               className="btn btn-outline"

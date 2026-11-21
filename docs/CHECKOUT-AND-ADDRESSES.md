@@ -1,5 +1,7 @@
 # Checkout and saved addresses
 
+> Historical browser-local prototype QA. The storage, phone identity, 94-test and concurrency descriptions below apply only with shared commerce disabled. Connected development now uses verified account IDs, private Supabase address books and atomic revision checks; see [current cloud-address behavior and acceptance](CLOUD-ADDRESSES.md). The delivery and pickup rules remain current.
+
 The minimum order setting applies only to home delivery and uses the final payable total, including delivery and after coupon discounts. With the default ₹199 minimum, ₹170 food + ₹49 delivery = ₹219 is eligible. Pickup has no minimum order value or delivery fee. The separate free-delivery threshold remains ₹250 food subtotal before coupons.
 
 Checkout shows any minimum shortfall before submission and uses the same calculation when creating an order. Kitchen availability, enabled payment methods and delivery PIN coverage still apply. Fees and totals are always calculated from current settings rather than a saved form draft.

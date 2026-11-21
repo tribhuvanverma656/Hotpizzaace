@@ -5,12 +5,19 @@ import { useRouter } from 'next/navigation';
 import { ArrowRight, ShieldCheck } from 'lucide-react';
 import { toast } from 'sonner';
 import { useDemoStore } from '@/lib/store';
+import { useSharedCommerce } from '@/components/shared-commerce-provider';
+import { GoogleAdminLogin } from '@/components/admin/google-admin-login';
 import { RestaurantLogo } from '@/components/restaurant-logo';
 export default function LoginPage() {
+  const shared = useSharedCommerce();
+  return shared.enabled ? <GoogleAdminLogin /> : <DemoLoginPage />;
+}
+
+function DemoLoginPage() {
   const router = useRouter();
   const login = useDemoStore((s) => s.login);
-  const [email, setEmail] = useState('owner@hotpizzaace.in');
-  const [password, setPassword] = useState('Demo@1234');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   return (
     <div className="admin-login-card">
@@ -67,8 +74,7 @@ export default function LoginPage() {
         <ShieldCheck size={20} />
         <p>
           This is a local prototype. The sign-in gate is cosmetic and does not provide secure
-          authentication. Use <strong>owner@hotpizzaace.in</strong> / <strong>Demo@1234</strong>. No
-          real accounts or payments.
+          authentication. No real accounts or payments.
         </p>
       </div>
       <Link className="admin-back-link" href="/">

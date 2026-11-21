@@ -1,0 +1,222 @@
+.screen {
+  max-width: 1300px;
+  margin: auto;
+  color: #273022;
+}
+.heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+.heading p {
+  font-size: 12px;
+  color: #647254;
+  letter-spacing: 0.12em;
+  font-weight: 800;
+}
+.heading h1 {
+  font-size: clamp(27px, 3vw, 38px);
+  margin: 8px 0;
+}
+.heading span {
+  font-size: 14px;
+  color: #707765;
+}
+.card {
+  border: 1px solid #dbe0d3;
+  background: #fffefa;
+  border-radius: 16px;
+  padding: 22px;
+}
+.card h2 {
+  margin: 0 0 8px;
+  font-size: 22px;
+}
+.card p {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #64705a;
+}
+.card > span {
+  font-size: 13px;
+  color: #758069;
+}
+.screen label {
+  display: grid;
+  gap: 7px;
+  font-size: 13px;
+  font-weight: 700;
+}
+.screen input,
+.screen select {
+  border: 1px solid #bdc9b0;
+  border-radius: 9px;
+  padding: 12px;
+  background: #fff;
+  font: inherit;
+  width: 100%;
+}
+.create {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 12px;
+  margin: 24px 0;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+}
+.actions :global(.btn) {
+  min-height: 40px;
+  font-size: 12px;
+  padding: 10px 13px;
+}
+.warning,
+.error {
+  padding: 16px 20px;
+  border-radius: 12px;
+  line-height: 1.6;
+  font-size: 14px;
+}
+.warning {
+  color: #8b5413;
+  background: #fff0d7;
+}
+.error {
+  color: #af3a21;
+  background: #fff0eb;
+}
+.print {
+  max-width: 560px;
+  margin: 25px auto;
+  background: white;
+  padding: 35px;
+  border: 1px solid #dedfd5;
+  border-radius: 16px;
+  text-align: center;
+}
+.print img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 20px auto;
+}
+.print p {
+  line-height: 1.6;
+  font-size: 14px;
+}
+.queue {
+  margin: 22px 0;
+  padding: 22px;
+  border: 1px solid #d6dfcd;
+  border-radius: 16px;
+  background: #f2f5ec;
+}
+.queue h2 {
+  margin: 0;
+  font-size: 22px;
+}
+.queue p {
+  line-height: 1.6;
+}
+.requests {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 18px;
+}
+.request {
+  text-align: left;
+  display: grid;
+  gap: 8px;
+  padding: 18px;
+  border: 1px solid #cdd9c2;
+  border-radius: 12px;
+  background: white;
+  color: inherit;
+  font: inherit;
+}
+.request small {
+  color: #6e7c61;
+}
+@media (max-width: 950px) {
+  .requests {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 600px) {
+  .heading {
+    align-items: start;
+    flex-direction: column;
+  }
+  .requests {
+    grid-template-columns: 1fr;
+  }
+  .card,
+  .queue {
+    padding: 18px;
+  }
+  .create > button {
+    flex: 1;
+  }
+}
+@media print {
+  .print {
+    border: 0;
+    border-radius: 0;
+  }
+  .print .actions {
+    display: none !important;
+  }
+}
+
+.requestSearch {
+  display: grid;
+  gap: 7px;
+  max-width: 480px;
+  font-size: 13px;
+  font-weight: 650;
+  margin-top: 16px;
+}
+.requestSearch input {
+  border: 1px solid #bdc9b0;
+  background: #fff;
+  border-radius: 9px;
+  padding: 12px;
+  font: inherit;
+  width: 100%;
+}
+
+/* Counter QR queue on phones: one compact block above the menu. */
+@media (max-width: 600px) {
+  .queue {
+    margin: 12px 0;
+    padding: 14px;
+  }
+  .queue .heading {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .queue .heading > div {
+    flex-basis: 100%;
+  }
+  .queue .heading > :global(.btn) {
+    flex: 1;
+    min-height: 44px;
+    padding: 8px 10px;
+  }
+  .queue h2 {
+    font-size: 19px;
+  }
+  .queue .heading p {
+    margin: 2px 0 0;
+    letter-spacing: 0.04em;
+  }
+}

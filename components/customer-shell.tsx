@@ -10,9 +10,15 @@ import { OrderTrackingShortcut } from '@/components/order-tracking-shortcut';
 import { RestaurantLogo } from '@/components/restaurant-logo';
 import { SocialLinks } from '@/components/social-links';
 import { BranchPicker } from '@/components/branch-picker';
+import { BusinessIdentity } from '@/components/business-identity';
+import { useCustomerAuth } from '@/components/customer-auth-provider';
+import { useSharedCommerce } from '@/components/shared-commerce-provider';
 import '@/components/customer-ordering-ux.css';
+import '@/components/mobile-polish.css';
 export function CustomerShell({ children }: { children: React.ReactNode }) {
   const path = usePathname();
+  const auth = useCustomerAuth();
+  const shared = useSharedCommerce();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
@@ -36,7 +42,31 @@ export function CustomerShell({ children }: { children: React.ReactNode }) {
     update();
     return () => observer.disconnect();
   }, [path]);
-  if (path.startsWith('/admin')) return <>{children}</>;
+  if (path.startsWith('/admin') || path.startsWith('/auth/') || path.startsWith('/dine-in/'))
+    return <>{children}</>;
+  const localCustomer = !shared.enabled && customerSession;
+  const accountHref = auth.user
+    ? '/account/profile'
+    : localCustomer
+      ? '/account/orders'
+      : '/account/login';
+  const accountLabel = auth.user ? 'My account' : localCustomer ? 'My orders' : 'Sign in';
+  const environmentBadge = !shared.enabled
+    ? 'DEMO EXPERIENCE'
+    : shared.mode === 'development'
+      ? 'TEST WEBSITE'
+      : shared.mode === 'production'
+        ? 'OFFICIAL WEBSITE'
+        : 'HOT PIZZA ACE';
+  const environmentDescription = !shared.enabled
+    ? 'Printed menu · Local demo · No real payments'
+    : shared.mode === 'development'
+      ? shared.allowSimulatedPayments
+        ? 'Development website · Simulated online payments'
+        : 'Development website · Test use only'
+      : shared.mode === 'production'
+        ? 'Official Hot Pizza Ace website'
+        : 'Hot Pizza Ace · Restaurant website';
   const count = mounted ? cart.reduce((a, i) => a + i.quantity, 0) : 0;
   let total = 0;
   try {
@@ -45,8 +75,8 @@ export function CustomerShell({ children }: { children: React.ReactNode }) {
   return (
     <>
       <div className="announcement">
-        <span>HAND-TOSSED. OVEN-FIRED. ALWAYS A GOOD IDEA.</span>
-        <span className="demo-dot">DEMO EXPERIENCE</span>
+        <span>PIZZA, SIDES & MORE · PREPARED FRESH TO ORDER</span>
+        <span className="demo-dot">{environmentBadge}</span>
       </div>
       <header className="site-header" ref={headerRef}>
         <div className="container nav-row">
@@ -69,14 +99,15 @@ export function CustomerShell({ children }: { children: React.ReactNode }) {
           </nav>
           <div className="nav-actions">
             <BranchPicker />
-            <Link
-              className="account-nav"
-              href={customerSession ? '/account/orders' : '/account/login'}
-            >
+            <Link className="account-nav" href={accountHref}>
               <UserRound size={18} />
-              <span>{customerSession ? 'My orders' : 'Sign in'}</span>
+              <span>{accountLabel}</span>
             </Link>
-            <Link href="/cart" className="cart-nav">
+            <Link
+              href="/cart"
+              className="cart-nav"
+              aria-label={`Cart, ${count} ${count === 1 ? 'item' : 'items'}`}
+            >
               <ShoppingBag size={20} />
               <span>Cart</span>
               <b>{count}</b>
@@ -94,11 +125,8 @@ export function CustomerShell({ children }: { children: React.ReactNode }) {
           <Link href="/track-order" onClick={() => setMobileOpen(false)}>
             Track order
           </Link>
-          <Link
-            href={customerSession ? '/account/orders' : '/account/login'}
-            onClick={() => setMobileOpen(false)}
-          >
-            {customerSession ? 'My orders' : 'Customer sign in'}
+          <Link href={accountHref} onClick={() => setMobileOpen(false)}>
+            {auth.user ? 'My account' : localCustomer ? 'My orders' : 'Customer sign in'}
           </Link>
         </nav>
         {mobileOpen && (
@@ -109,8 +137,8 @@ export function CustomerShell({ children }: { children: React.ReactNode }) {
               ['/#offers', 'Offers'],
               ['/track-order', 'Track order'],
               [
-                customerSession ? '/account/orders' : '/account/login',
-                customerSession ? 'My orders' : 'Customer sign in',
+                accountHref,
+                auth.user ? 'My account' : localCustomer ? 'My orders' : 'Customer sign in',
               ],
               ['/account/addresses', 'Saved addresses'],
             ].map(([url, label]) => (
@@ -122,9 +150,12 @@ export function CustomerShell({ children }: { children: React.ReactNode }) {
           </nav>
         )}
       </header>
-      {!['/cart', '/track-order', '/order-success'].includes(path) && (
-        <OrderTrackingShortcut banner />
-      )}
+      {!auth.loading &&
+        !auth.error &&
+        (!auth.user || shared.enabled) &&
+        !['/cart', '/track-order', '/order-success'].includes(path) && (
+          <OrderTrackingShortcut banner />
+        )}
       {!settings.acceptingOrders || settings.temporarilyClosed ? (
         <div className="closure-banner">
           Our ovens are taking a break. You can browse the menu; ordering is currently paused.
@@ -135,7 +166,25 @@ export function CustomerShell({ children }: { children: React.ReactNode }) {
           {persistenceError}
         </div>
       )}
-      <main key={selectedBranchId}>{children}</main>
+      <main key={selectedBranchId}>
+        {shared.enabled && !shared.ready && ['/', '/menu', '/cart', '/checkout'].includes(path) ? (
+          <div className="container empty-state" role={shared.error ? 'alert' : 'status'}>
+            {shared.error ? (
+              <>
+                <h1>Let’s reconnect to the kitchen.</h1>
+                <p>{shared.error}</p>
+                <button className="btn btn-primary" onClick={() => void shared.refresh()}>
+                  Try again
+                </button>
+              </>
+            ) : (
+              'Loading the latest restaurant menu…'
+            )}
+          </div>
+        ) : (
+          children
+        )}
+      </main>
       <footer className="site-footer">
         <div className="container footer-top">
           <div>
@@ -189,6 +238,9 @@ export function CustomerShell({ children }: { children: React.ReactNode }) {
             </Link>
           </div>
         </div>
+        <div className="container">
+          <BusinessIdentity branchId="barra" appearance="footer" />
+        </div>
         <nav className="container footer-policy-links" aria-label="Restaurant information">
           <Link href="/about">About us</Link>
           <Link href="/contact">Contact</Link>
@@ -200,7 +252,7 @@ export function CustomerShell({ children }: { children: React.ReactNode }) {
         </nav>
         <div className="container footer-bottom">
           <span>© {new Date().getFullYear()} Hot Pizza Ace. All slices reserved.</span>
-          <span>Printed menu · Local demo · No real payments</span>
+          <span>{environmentDescription}</span>
           <Link href="/admin/login">
             Staff login <ArrowRight size={12} />
           </Link>

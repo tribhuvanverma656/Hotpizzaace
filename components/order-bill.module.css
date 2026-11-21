@@ -1,0 +1,135 @@
+.bill {
+  background: #fff;
+  padding: 28px;
+  border: 1px solid #e5e2d9;
+  border-radius: 18px;
+  overflow-wrap: anywhere;
+  color: #242721;
+}
+.controls {
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 25px;
+}
+.paper {
+  display: grid;
+  gap: 5px;
+  font-size: 12px;
+}
+.paper select {
+  border: 1px solid #d8d9d0;
+  border-radius: 8px;
+  padding: 10px;
+  background: #fff;
+  color: inherit;
+}
+.printError {
+  flex-basis: 100%;
+  color: #a42c21;
+  font-size: 13px;
+}
+.header {
+  text-align: center;
+  border-bottom: 1px dashed #ccc;
+  padding-bottom: 20px;
+}
+.header h2 {
+  font-size: 25px;
+  margin: 0 0 20px;
+}
+.header > strong {
+  display: block;
+  font-size: 22px;
+}
+.header address {
+  font-style: normal;
+  line-height: 1.6;
+  font-size: 14px;
+  margin: 12px auto;
+  max-width: 360px;
+}
+.header p {
+  margin: 6px 0;
+  font-size: 14px;
+}
+.references {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px 15px;
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 24px 0;
+}
+.references dt {
+  color: #626459;
+}
+.references dd {
+  margin: 0;
+  text-align: right;
+}
+.items {
+  border-bottom: 1px dashed #ccc;
+  margin: 24px 0;
+  padding-bottom: 15px;
+}
+.items > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 12px 0;
+  font-size: 15px;
+}
+.items small {
+  display: block;
+  line-height: 1.5;
+  color: #666b5d;
+  font-size: 13px;
+  margin-top: 5px;
+}
+.status {
+  font-weight: 750;
+  font-size: 14px;
+}
+.notice {
+  font-size: 12px;
+  line-height: 1.7;
+  color: #5d6256;
+  margin-top: 20px;
+}
+@media (max-width: 500px) {
+  .bill {
+    padding: 20px;
+  }
+  .references {
+    grid-template-columns: 1fr;
+  }
+  .references dd {
+    text-align: left;
+    margin-bottom: 8px;
+  }
+}
+@media print {
+  .controls {
+    display: none;
+  }
+  .bill {
+    border: 0;
+    border-radius: 0;
+    padding: 0;
+    break-inside: avoid;
+    font-size: 11pt;
+    box-shadow: none;
+  }
+  .header h2 {
+    font-size: 18pt;
+  }
+}
+
+.printHint {
+  flex-basis: 100%;
+  font-size: 12px;
+  color: #5d6256;
+}

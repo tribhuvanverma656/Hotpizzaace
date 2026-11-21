@@ -12,25 +12,26 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useDemoStore } from '@/lib/store';
-import { getUnitPrice, getItemOptions } from '@/lib/pricing';
+import { getCartTotals, getUnitPrice, getItemOptions } from '@/lib/pricing';
 import { money } from '@/lib/utils';
 import { OrderSummary } from '@/components/order-summary';
 import { OrderTrackingShortcut } from '@/components/order-tracking-shortcut';
+import styles from './cart.module.css';
 export default function CartPage() {
-  const { cart, products, settings, hydrated, updateQuantity, removeFromCart } = useDemoStore();
-  const invalid = cart.some((i) => {
-    try {
-      const p = products.find((p) => p.id === i.productId);
-      if (!p) return true;
-      getUnitPrice(p, i);
-      return false;
-    } catch {
-      return true;
-    }
-  });
+  const { cart, products, settings, coupon, hydrated, updateQuantity, removeFromCart } =
+    useDemoStore();
+  const itemCount = cart.reduce((count, item) => count + item.quantity, 0);
+  let total: number | null = null;
+  try {
+    total = getCartTotals(cart, products, settings, coupon).total;
+  } catch {
+    // The summary and item rows explain pricing errors; keep checkout unavailable.
+  }
+  const invalid = total === null;
   const update = (id: string, q: number) => {
     try {
       updateQuantity(id, q);
+      if (q === 0) toast('Item removed');
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Could not update cart');
     }
@@ -65,8 +66,7 @@ export default function CartPage() {
       </>
     );
   return (
-    <div className="container journey-page cart-page">
-      <OrderTrackingShortcut />
+    <div className={`container journey-page cart-page ${styles.page}`}>
       <Link href="/menu" className="back-link">
         <ArrowLeft size={16} />
         Continue browsing
@@ -77,7 +77,7 @@ export default function CartPage() {
           Your <em>cart.</em>
         </h1>
         <p>
-          {cart.reduce((a, i) => a + i.quantity, 0)} items · Review your choices before checkout.
+          {itemCount} {itemCount === 1 ? 'item' : 'items'} · Review your choices before checkout.
         </p>
       </div>
       <div className="checkout-grid">
@@ -128,8 +128,12 @@ export default function CartPage() {
                   <strong>{money(price * item.quantity)}</strong>
                   <div className="quantity-control">
                     <button
-                      disabled={item.quantity <= 1 || !!error}
-                      aria-label={`Decrease ${product?.name} quantity`}
+                      disabled={item.quantity > 1 && !!error}
+                      aria-label={
+                        item.quantity === 1
+                          ? `Remove ${product?.name || 'item'} from cart`
+                          : `Decrease ${product?.name} quantity`
+                      }
                       onClick={() => update(item.id, item.quantity - 1)}
                     >
                       <Minus size={14} />
@@ -162,21 +166,30 @@ export default function CartPage() {
           </Link>
         </div>
         <OrderSummary>
-          <Link
-            href={invalid ? '#' : '/checkout'}
-            aria-disabled={invalid}
-            className={`btn btn-primary summary-checkout ${invalid ? 'disabled' : ''}`}
-            onClick={(e) => {
-              if (invalid) {
-                e.preventDefault();
-                toast.error('Remove unavailable items before checkout.');
-              }
-            }}
-          >
-            Continue to checkout <ArrowRight size={18} />
-          </Link>
+          <div className={styles.checkoutAction}>
+            <div className={styles.mobileTotal} aria-live="polite" aria-atomic="true">
+              <span>
+                {itemCount} {itemCount === 1 ? 'item' : 'items'} · Total
+              </span>
+              <strong>{total === null ? 'Check cart' : money(total)}</strong>
+            </div>
+            <Link
+              href={invalid ? '#' : '/checkout'}
+              aria-disabled={invalid}
+              className={`btn btn-primary summary-checkout ${styles.checkoutLink} ${invalid ? 'disabled' : ''}`}
+              onClick={(e) => {
+                if (invalid) {
+                  e.preventDefault();
+                  toast.error('Please check your cart before checkout.');
+                }
+              }}
+            >
+              Continue to checkout <ArrowRight size={18} />
+            </Link>
+          </div>
         </OrderSummary>
       </div>
+      <OrderTrackingShortcut />
     </div>
   );
 }

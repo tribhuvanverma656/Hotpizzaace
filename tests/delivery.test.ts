@@ -89,15 +89,13 @@ test('pickup has no minimum and delivery minimum uses the payable total includin
   assert.equal(delivery.subtotal, 17000);
   assert.equal(delivery.deliveryFee, 4900);
   assert.equal(delivery.total, 21900);
-  useDemoStore
-    .getState()
-    .updateSettings({
-      ...settings,
-      couponCode: 'LESS',
-      couponPercent: 50,
-      couponMinimum: 0,
-      couponMaximum: 100000,
-    });
+  useDemoStore.getState().updateSettings({
+    ...settings,
+    couponCode: 'LESS',
+    couponPercent: 50,
+    couponMinimum: 0,
+    couponMaximum: 100000,
+  });
   useDemoStore.getState().addToCart(item);
   useDemoStore.getState().applyCoupon('LESS');
   assert.throws(
@@ -110,7 +108,7 @@ test('delivery is charged below the threshold and free at or above it', () => {
   assert.equal(totals(24999).deliveryFee, 4900);
   assert.equal(totals(25000).deliveryFee, 0);
   assert.equal(totals(25001).deliveryFee, 0);
-  assert.equal(totals(24999).total, 29899);
+  assert.equal(totals(24999).total, 29900);
   assert.equal(getCartTotals([], [], settings).deliveryFee, 0);
   assert.equal(totals(10000, settings, 'pickup').deliveryFee, 0);
 });
@@ -158,7 +156,11 @@ test('delivery settings migration applies confirmed rules and preserves catalog,
   const migrated = migrateDemoState(state, 4);
   assert.equal(migrated.settings?.freeDeliveryThreshold, 25000);
   assert.equal(migrated.settings?.deliveryFee, 4900);
-  assert.strictEqual(migrated.products, state.products);
+  assert.strictEqual(migrated.products?.[0], state.products[0]);
+  assert.deepEqual(
+    migrated.products?.slice(1).map((item) => item.price),
+    [1000, 2000],
+  );
   assert.strictEqual(migrated.orders, state.orders);
   assert.strictEqual(migrated.cart, state.cart);
   assert.strictEqual(migrated.customerSession, state.customerSession);

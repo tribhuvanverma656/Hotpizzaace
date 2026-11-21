@@ -6,7 +6,7 @@ import { BusinessContact, OrderingFacts } from '@/components/info/business-info'
 export const metadata: Metadata = {
   title: 'Delivery & pickup',
   description:
-    'Current demo delivery fees, service postal codes, pickup details and preparation estimates.',
+    'Current delivery settings, pickup details, connected order tracking and development availability.',
 };
 
 export default function DeliveryPage() {
@@ -37,10 +37,10 @@ export default function DeliveryPage() {
           content: (
             <p>
               When delivery is enabled, enter your name, mobile number, full address, locality and
-              postal code at checkout. The demo checks the postal code against its configured
-              service area. An optional landmark or short instruction can help explain an address.
-              For a real order, confirm delivery coverage directly with the restaurant; this
-              prototype does not dispatch a rider.
+              postal code at checkout. The connected service checks the postal code against its
+              configured service area. An optional landmark or short instruction can help explain an
+              address. For a real order, confirm delivery coverage directly with the restaurant;
+              this development website does not dispatch a rider.
             </p>
           ),
         },
@@ -53,7 +53,8 @@ export default function DeliveryPage() {
                 Pickup has no minimum order value and no delivery charge. When enabled, checkout
                 asks for your name and mobile number without requiring a delivery address. The
                 restaurant address is shown before submission. A demo confirmation does not arrange
-                an actual pickup.
+                an actual pickup. An enabled connected test checkout still saves its order and
+                contact details on the server.
               </p>
               <BusinessContact />
             </>
@@ -66,9 +67,12 @@ export default function DeliveryPage() {
             <p>
               Preparation time is an estimate, not a promised arrival time. Kitchen status, delivery
               and pickup can be paused separately in the dashboard. When ordering is paused, you may
-              browse the menu but cannot place a new demo order. Existing order status is shown
-              under <Link href="/track-order">Track order</Link>; this is staff status tracking
-              within the same browser, not a live rider map.
+              browse the menu but cannot submit a new order. Existing connected order status is
+              shown under <Link href="/track-order">Track order</Link>. Orders placed while signed
+              in can be opened through the same account on another device; guest orders use the
+              original browser session or a private tracking link. Staff updates to connected orders
+              are stored on the server. Tracking does not show a live rider location. A separate
+              local demo’s order statuses remain in its browser.
             </p>
           ),
         },
@@ -76,8 +80,10 @@ export default function DeliveryPage() {
     >
       <InfoNote>
         <p>
-          <strong>This is a local demo.</strong> Delivery fees and pickup choices can be tested, but
-          no real delivery or collection is scheduled here.
+          <strong>Live ordering is paused while development continues.</strong> Delivery and pickup
+          settings describe the checkout rules, not a promise of current fulfillment. Connected test
+          orders are stored on the server, payment simulations or Razorpay test payments do not
+          charge real money, and no real delivery or collection is scheduled by a test confirmation.
         </p>
       </InfoNote>
     </InfoPage>

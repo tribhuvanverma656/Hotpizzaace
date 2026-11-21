@@ -1,7 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import {
   ArrowLeft,
   ArrowRight,
@@ -19,6 +19,25 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useDemoStore } from '@/lib/store';
+import { useSharedCommerce } from '@/components/shared-commerce-provider';
+import { useCustomerAuth } from '@/components/customer-auth-provider';
+import { useCustomerAddresses } from '@/components/customer-addresses-provider';
+import {
+  cartMatchesPlacedOrder,
+  CommerceError,
+  orderConfirmationHref,
+} from '@/lib/commerce/client';
+import type { SharedSavedAddress } from '@/lib/commerce/addresses';
+import {
+  applySharedCheckoutDefault,
+  clearSharedCheckoutDraft,
+  loadSharedCheckoutDraft,
+  newSharedCheckoutDraft,
+  saveSharedCheckoutDraft,
+  sharedCheckoutAddressState,
+  sharedCheckoutDraftKey,
+  type SharedCheckoutDraft,
+} from '@/lib/shared-checkout-draft';
 import { getCartTotals, getMinimumOrderShortfall } from '@/lib/pricing';
 import { validateCheckout } from '@/lib/validation';
 import { resolveCheckoutAttempt, type CheckoutAttempt } from '@/lib/checkout-attempt';
@@ -37,11 +56,18 @@ import {
 } from '@/lib/checkout-draft';
 import { getCustomerAddresses, getDefaultCustomerAddress } from '@/lib/customer-addresses';
 import { money } from '@/lib/utils';
-import { Customer, Fulfillment, Order, PaymentStatus, SavedAddress } from '@/types';
+import { Customer, Fulfillment, PaymentStatus, SavedAddress } from '@/types';
 import { OrderSummary } from '@/components/order-summary';
+import { OnlinePayment } from '@/components/payments/online-payment';
+import { gatewayLabels, isGatewayMode, isTestGatewayMode } from '@/lib/payments/method';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { openRazorpayCheckout } from '@/lib/razorpay-checkout';
 import '@/components/checkout-ux.css';
+type CheckoutAddress = SavedAddress | SharedSavedAddress;
+type CurrentCheckoutDraft = Omit<CheckoutDraft, 'selectedAddressSnapshot'> & {
+  selectedAddressSnapshot: CheckoutAddress | null;
+  selectedAddressRevision?: number | null;
+  addressTouched?: boolean;
+};
 function draftStorage() {
   try {
     return typeof window === 'undefined' ? undefined : window.sessionStorage;
@@ -51,14 +77,37 @@ function draftStorage() {
 }
 export default function CheckoutPage() {
   const { selectedBranchId, customerSession } = useDemoStore();
+  const shared = useSharedCommerce();
+  const auth = useCustomerAuth();
+  const identity = shared.enabled ? auth.contextId : null;
+  const currentIdentity = useRef({ identity, loading: auth.loading, error: auth.error });
+  useLayoutEffect(() => {
+    currentIdentity.current = { identity, loading: auth.loading, error: auth.error };
+  }, [identity, auth.loading, auth.error]);
   return (
     <CheckoutForm
-      key={checkoutDraftKey({ branchId: selectedBranchId, phone: customerSession?.phone })}
+      identityIsCurrent={() =>
+        !shared.enabled ||
+        (!!identity &&
+          !currentIdentity.current.loading &&
+          !currentIdentity.current.error &&
+          currentIdentity.current.identity === identity)
+      }
+      key={
+        shared.enabled
+          ? `shared:${selectedBranchId}:${auth.contextId ?? 'unverified'}`
+          : checkoutDraftKey({ branchId: selectedBranchId, phone: customerSession?.phone })
+      }
     />
   );
 }
-function CheckoutForm() {
+function CheckoutForm({ identityIsCurrent }: { identityIsCurrent: () => boolean }) {
   const router = useRouter();
+  const shared = useSharedCommerce();
+  const auth = useCustomerAuth();
+  const addressBook = useCustomerAddresses();
+  const sharedIdentity = shared.enabled ? (auth.user?.id ?? null) : null;
+  const storage = useCallback(() => draftStorage(), []);
   const {
     cart,
     products,
@@ -77,19 +126,27 @@ function CheckoutForm() {
   const [fulfillmentChoice, setFulfillment] = useState<Fulfillment>('delivery');
   const [customer, setCustomer] = useState<Customer>(() => emptyCheckoutCustomer());
   const [methodChoice, setMethod] = useState<'upi' | 'card' | 'cash'>('upi');
-  const sessionPhone = customerSession?.phone;
+  const sessionPhone = shared.enabled ? undefined : customerSession?.phone;
   const [draftReady, setDraftReady] = useState(false);
   const [selectedAddressId, setSelectedAddressId] = useState('');
-  const [selectedAddressSnapshot, setSelectedAddressSnapshot] = useState<SavedAddress | null>(null);
+  const [selectedAddressSnapshot, setSelectedAddressSnapshot] = useState<CheckoutAddress | null>(
+    null,
+  );
   const [addressLabel, setAddressLabel] = useState('');
   const [addressMessage, setAddressMessage] = useState('');
   const [addressError, setAddressError] = useState('');
-  const draftRef = useRef<CheckoutDraft | null>(null);
+  const [addressConflict, setAddressConflict] = useState(false);
+  const [addressRevision, setAddressRevision] = useState<number | null>(null);
+  const [addressSaving, setAddressSaving] = useState(false);
+  const addressSaveInFlight = useRef(false);
+  const pendingAddressId = useRef<string | null>(null);
+  const draftRef = useRef<CurrentCheckoutDraft | null>(null);
   const draftCompleted = useRef(false);
   const initializedScope = useRef('');
   const checkoutActive = useRef(true);
   const scope = { branchId: selectedBranchId, phone: sessionPhone };
-  const scopeKey = checkoutDraftKey(scope);
+  const sharedScope = { branchId: selectedBranchId, userId: sharedIdentity };
+  const scopeKey = shared.enabled ? sharedCheckoutDraftKey(sharedScope) : checkoutDraftKey(scope);
   const attemptStorageKey = `${scopeKey}:attempt`;
   useEffect(() => {
     checkoutActive.current = true;
@@ -101,26 +158,35 @@ function CheckoutForm() {
     const state = useDemoStore.getState();
     return (
       checkoutActive.current &&
+      identityIsCurrent() &&
       isCheckoutScopeCurrent(scope, {
         branchId: state.selectedBranchId,
-        phone: state.customerSession?.phone,
+        phone: shared.enabled ? undefined : state.customerSession?.phone,
       })
     );
   };
   useEffect(() => {
-    if (!hydrated) return;
+    if (!hydrated || (shared.enabled && auth.loading)) return;
     const currentScope = { branchId: selectedBranchId, phone: sessionPhone };
-    const key = checkoutDraftKey(currentScope);
+    const currentSharedScope = { branchId: selectedBranchId, userId: sharedIdentity };
+    const key = shared.enabled
+      ? sharedCheckoutDraftKey(currentSharedScope)
+      : checkoutDraftKey(currentScope);
     if (initializedScope.current === key) return;
-    const storage = draftStorage();
-    const saved = loadCheckoutDraft(storage, currentScope);
+    const target = storage();
+    const saved = shared.enabled ? null : loadCheckoutDraft(target, currentScope);
+    const sharedSaved = shared.enabled ? loadSharedCheckoutDraft(target, currentSharedScope) : null;
     const defaultAddress = sessionPhone
       ? getDefaultCustomerAddress(useDemoStore.getState().savedAddresses, sessionPhone)
       : undefined;
     const guestDraft = sessionPhone
-      ? loadCheckoutDraft(storage, { branchId: selectedBranchId })
+      ? loadCheckoutDraft(target, { branchId: selectedBranchId })
       : null;
-    const restored = initializeCheckoutDraft(currentScope, saved, defaultAddress, guestDraft);
+    const restored: CurrentCheckoutDraft = shared.enabled
+      ? sharedSaved
+        ? { ...sharedSaved, addressTouched: true }
+        : newSharedCheckoutDraft(currentSharedScope)
+      : initializeCheckoutDraft(currentScope, saved, defaultAddress, guestDraft);
     initializedScope.current = key;
     draftRef.current = restored;
     setCustomer(restored.customer);
@@ -129,11 +195,69 @@ function CheckoutForm() {
     setSelectedAddressId(restored.selectedAddressId);
     setSelectedAddressSnapshot(restored.selectedAddressSnapshot);
     setAddressLabel(restored.addressLabel);
-    const restoredSaved = saveCheckoutDraft(storage, currentScope, restored);
+    setAddressRevision(restored.selectedAddressRevision ?? null);
+    const restoredSaved = shared.enabled
+      ? saveSharedCheckoutDraft(target, currentSharedScope, restored as SharedCheckoutDraft)
+      : saveCheckoutDraft(target, currentScope, restored as CheckoutDraft);
     if (restoredSaved && !saved && !defaultAddress && guestDraft)
-      clearMatchingGuestCheckoutDraft(storage, currentScope);
+      clearMatchingGuestCheckoutDraft(target, currentScope);
     setDraftReady(true);
-  }, [hydrated, selectedBranchId, sessionPhone]);
+  }, [
+    hydrated,
+    selectedBranchId,
+    sessionPhone,
+    storage,
+    shared.enabled,
+    sharedIdentity,
+    auth.loading,
+  ]);
+  useEffect(() => {
+    if (
+      !shared.enabled ||
+      !settings.deliveryEnabled ||
+      (fulfillmentChoice === 'pickup' && settings.pickupEnabled) ||
+      !sharedIdentity ||
+      !draftReady ||
+      addressBook.loading ||
+      addressBook.error ||
+      addressBook.revision === null ||
+      !draftRef.current ||
+      !identityIsCurrent()
+    )
+      return;
+    const current = draftRef.current as SharedCheckoutDraft;
+    const next = applySharedCheckoutDefault(
+      current,
+      addressBook.addresses.find((address) => address.isDefault),
+      addressBook.revision,
+    );
+    if (next === current) return;
+    draftRef.current = next;
+    setCustomer(next.customer);
+    setSelectedAddressId(next.selectedAddressId);
+    setSelectedAddressSnapshot(next.selectedAddressSnapshot);
+    setAddressLabel(next.addressLabel);
+    setAddressRevision(next.selectedAddressRevision);
+    saveSharedCheckoutDraft(
+      storage(),
+      { branchId: selectedBranchId, userId: sharedIdentity },
+      next,
+    );
+  }, [
+    shared.enabled,
+    sharedIdentity,
+    draftReady,
+    addressBook.addresses,
+    addressBook.loading,
+    addressBook.error,
+    addressBook.revision,
+    selectedBranchId,
+    storage,
+    identityIsCurrent,
+    fulfillmentChoice,
+    settings.deliveryEnabled,
+    settings.pickupEnabled,
+  ]);
   const [error, setError] = useState('');
   const [paymentError, setPaymentError] = useState('');
   const [paymentOrderId, setPaymentOrderId] = useState<string | null>(null);
@@ -158,10 +282,17 @@ function CheckoutForm() {
         : settings.deliveryEnabled
           ? 'delivery'
           : 'pickup';
-  const method = settings.paymentMethods.includes(methodChoice)
+  const simulatorAvailable = !shared.enabled || shared.allowSimulatedPayments;
+  const availablePaymentMethods = settings.paymentMethods.filter(
+    (paymentMethod) => paymentMethod === 'cash' || !!shared.onlinePayment || simulatorAvailable,
+  );
+  const method = availablePaymentMethods.includes(methodChoice)
     ? methodChoice
-    : (settings.paymentMethods[0] ?? 'upi');
-  const paymentOrder = orders.find((order) => order.id === paymentOrderId) ?? null;
+    : (availablePaymentMethods[0] ?? 'upi');
+  const paymentOrder =
+    (shared.enabled ? shared.customerOrders : orders).find(
+      (order) => order.id === paymentOrderId,
+    ) ?? null;
   const stage: PaymentStatus = busy
     ? 'pending'
     : paymentOrder?.paymentStatus === 'failed' && retryReady
@@ -170,8 +301,9 @@ function CheckoutForm() {
   const fulfillmentAvailable =
     fulfillment === 'delivery' ? settings.deliveryEnabled : settings.pickupEnabled;
   const checkoutAvailable =
+    (!shared.enabled || (shared.ready && !auth.loading && !auth.error)) &&
     fulfillmentAvailable &&
-    settings.paymentMethods.includes(method) &&
+    availablePaymentMethods.includes(method) &&
     settings.acceptingOrders &&
     !settings.temporarilyClosed;
   let currentDeliveryFee: number | null = null;
@@ -184,33 +316,64 @@ function CheckoutForm() {
   }
   const minimumShortfall =
     checkoutTotal === null ? 0 : getMinimumOrderShortfall(checkoutTotal, settings, fulfillment);
-  const customerAddresses = sessionPhone ? getCustomerAddresses(savedAddresses, sessionPhone) : [];
+  const canSaveAddress = shared.enabled
+    ? !!sharedIdentity && !auth.loading && !auth.error
+    : !!sessionPhone;
+  const cloudAddressesAvailable =
+    !addressBook.loading &&
+    addressBook.revision !== null &&
+    (!addressBook.error ||
+      ['address_revision_conflict', 'address_not_found', 'address_duplicate'].includes(
+        addressBook.errorCode ?? '',
+      ));
+  const localAddresses = sessionPhone ? getCustomerAddresses(savedAddresses, sessionPhone) : [];
+  const customerAddresses: CheckoutAddress[] = shared.enabled
+    ? addressBook.addresses
+    : localAddresses;
   const selectedSavedAddress = customerAddresses.find(
     (address) => address.id === selectedAddressId,
   );
-  const selectedAddressState = getSelectedCheckoutAddressState(
-    selectedAddressId,
-    selectedAddressSnapshot,
-    selectedSavedAddress,
-  );
-  const selectedAddressStale = !['new', 'current'].includes(selectedAddressState);
+  const selectedAddressState = shared.enabled
+    ? !cloudAddressesAvailable && selectedAddressId
+      ? 'unverified'
+      : sharedCheckoutAddressState(
+          selectedAddressId,
+          selectedAddressSnapshot && !('ownerPhone' in selectedAddressSnapshot)
+            ? selectedAddressSnapshot
+            : null,
+          addressBook.addresses.find((address) => address.id === selectedAddressId),
+        )
+    : getSelectedCheckoutAddressState(
+        selectedAddressId,
+        selectedAddressSnapshot && 'ownerPhone' in selectedAddressSnapshot
+          ? selectedAddressSnapshot
+          : null,
+        localAddresses.find((address) => address.id === selectedAddressId),
+      );
+  const selectedAddressStale =
+    addressConflict || !['new', 'current'].includes(selectedAddressState);
   const outsideDeliveryArea =
     fulfillment === 'delivery' &&
     /^\d{6}$/.test(customer.postalCode) &&
     !settings.servicePostalCodes.includes(customer.postalCode);
-  const persistDraft = (changes: Partial<CheckoutDraft>) => {
+  const persistDraft = (changes: Partial<CurrentCheckoutDraft>) => {
     if (!draftRef.current || draftCompleted.current || !checkoutIsCurrent()) return;
     const next = { ...draftRef.current, ...changes };
     draftRef.current = next;
-    saveCheckoutDraft(draftStorage(), scope, next);
+    if (shared.enabled)
+      saveSharedCheckoutDraft(storage(), sharedScope, next as SharedCheckoutDraft);
+    else saveCheckoutDraft(storage(), scope, next as CheckoutDraft);
   };
   const finishDraft = () => {
     if (!checkoutIsCurrent()) return;
     draftCompleted.current = true;
-    clearCheckoutDraft(draftStorage(), scope);
-    clearMatchingGuestCheckoutDraft(draftStorage(), scope);
+    if (shared.enabled) clearSharedCheckoutDraft(storage(), sharedScope);
+    else {
+      clearCheckoutDraft(storage(), scope);
+      clearMatchingGuestCheckoutDraft(storage(), scope);
+    }
     try {
-      draftStorage()?.removeItem(attemptStorageKey);
+      storage()?.removeItem(attemptStorageKey);
     } catch {
       /* Order completion remains usable without storage. */
     }
@@ -219,7 +382,7 @@ function CheckoutForm() {
   const saveAttempt = (attempt: CheckoutAttempt) => {
     request.current = attempt;
     try {
-      window.sessionStorage.setItem(attemptStorageKey, JSON.stringify(attempt));
+      storage()?.setItem(attemptStorageKey, JSON.stringify(attempt));
     } catch {
       /* The in-memory key still prevents repeat submissions in this tab. */
     }
@@ -230,17 +393,21 @@ function CheckoutForm() {
     setAddressMessage('');
     setAddressError('');
     setError('');
-    persistDraft({ customer: next });
+    persistDraft({ customer: next, addressTouched: true });
   };
   const chooseFulfillment = (choice: Fulfillment) => {
     setFulfillment(choice);
     setError('');
-    persistDraft({ fulfillment: choice });
+    persistDraft({ fulfillment: choice, ...(choice === 'pickup' ? { addressTouched: true } : {}) });
   };
   const chooseAddress = (id: string) => {
     const saved = customerAddresses.find((address) => address.id === id);
     const next = saved
-      ? { ...saved.customer, phone: sessionPhone!, instructions: customer.instructions }
+      ? {
+          ...saved.customer,
+          ...(sessionPhone ? { phone: sessionPhone } : {}),
+          instructions: customer.instructions,
+        }
       : {
           ...emptyCheckoutCustomer(sessionPhone),
           name: customer.name,
@@ -250,27 +417,131 @@ function CheckoutForm() {
     setSelectedAddressId(saved?.id ?? '');
     setSelectedAddressSnapshot(saved ?? null);
     setAddressLabel(saved?.label ?? '');
+    setAddressRevision(shared.enabled ? addressBook.revision : null);
+    setAddressConflict(false);
     setAddressMessage('');
     setAddressError('');
     setError('');
+    pendingAddressId.current = null;
     persistDraft({
       customer: next,
       selectedAddressId: saved?.id ?? '',
       addressLabel: saved?.label ?? '',
       selectedAddressSnapshot: saved ?? null,
+      selectedAddressRevision: shared.enabled ? addressBook.revision : null,
+      addressTouched: true,
     });
+  };
+  const saveAddress = async () => {
+    if (
+      !checkoutIsCurrent() ||
+      fulfillment !== 'delivery' ||
+      !canSaveAddress ||
+      addressSaveInFlight.current
+    )
+      return;
+    if (selectedAddressStale) {
+      setAddressError(
+        'Review the current saved version before updating it, or save these details as a new address.',
+      );
+      return;
+    }
+    addressSaveInFlight.current = true;
+    setAddressSaving(true);
+    setAddressError('');
+    setAddressMessage('');
+    const selectedId = selectedAddressId;
+    const label = addressLabel.trim() || 'Home';
+    try {
+      const id = selectedId || pendingAddressId.current || crypto.randomUUID();
+      pendingAddressId.current = id;
+      const input = {
+        id,
+        label,
+        customer: { ...customer, instructions: '' },
+        isDefault: selectedAddressSnapshot?.isDefault ?? false,
+      };
+      let saved: CheckoutAddress | undefined;
+      let savedRevision: number | null = null;
+      if (shared.enabled) {
+        if (!cloudAddressesAvailable || addressBook.revision === null)
+          throw new Error(
+            'Reconnect to your saved addresses before saving. Your checkout details are kept.',
+          );
+        const expectedRevision = selectedId ? addressRevision : addressBook.revision;
+        if (expectedRevision === null)
+          throw new Error('Review the saved address before updating it.');
+        const result = selectedId
+          ? await addressBook.update(selectedId, input, expectedRevision)
+          : await addressBook.create(input, expectedRevision);
+        if (!checkoutIsCurrent()) return;
+        saved = result.addresses.find((address) => address.id === id);
+        savedRevision = result.revision;
+      } else {
+        if (!sessionPhone) return;
+        if (selectedId) {
+          if (!selectedAddressSnapshot || !('ownerPhone' in selectedAddressSnapshot))
+            throw new Error('Review the saved address before updating it.');
+          saveCustomerAddress(input, {
+            mode: 'update',
+            expectedOwnerPhone: sessionPhone,
+            expected: selectedAddressSnapshot,
+          });
+        } else saveCustomerAddress(input, { mode: 'create', expectedOwnerPhone: sessionPhone });
+        saved = getCustomerAddresses(useDemoStore.getState().savedAddresses, sessionPhone).find(
+          (address) => address.id === id,
+        );
+      }
+      if (!saved)
+        throw new Error('Refresh your address book to confirm whether this address was saved.');
+      if (!checkoutIsCurrent()) return;
+      pendingAddressId.current = null;
+      setSelectedAddressId(saved.id);
+      setSelectedAddressSnapshot(saved);
+      setAddressRevision(savedRevision);
+      // An edit made while the request was pending remains in this checkout.
+      const sameLabel = draftRef.current?.addressLabel === addressLabel;
+      if (sameLabel) setAddressLabel(label);
+      persistDraft({
+        selectedAddressId: saved.id,
+        selectedAddressSnapshot: saved,
+        selectedAddressRevision: savedRevision,
+        addressTouched: true,
+        ...(sameLabel ? { addressLabel: label } : {}),
+      });
+      setAddressMessage(
+        selectedId ? 'Saved address updated.' : 'Address saved for your next order.',
+      );
+    } catch (cause) {
+      if (!checkoutIsCurrent()) return;
+      if (cause instanceof CommerceError && (cause.status === 409 || cause.status === 404))
+        setAddressConflict(true);
+      setAddressError(
+        cause instanceof CommerceError && cause.code === 'address_duplicate'
+          ? cause.message
+          : cause instanceof CommerceError && (cause.status === 409 || cause.status === 404)
+            ? 'Your saved addresses changed. Your entered details are kept. Review the current saved version or keep these details as a new address before saving again.'
+            : cause instanceof Error
+              ? cause.message
+              : 'Unable to save this address. Your checkout details are kept.',
+      );
+    } finally {
+      addressSaveInFlight.current = false;
+      if (checkoutIsCurrent()) setAddressSaving(false);
+    }
   };
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (submitting.current || busy || !checkoutIsCurrent()) return;
     submitting.current = true;
+    setBusy(true);
     setError('');
     setPaymentError('');
     try {
       if (!loadedAttempt.current) {
         loadedAttempt.current = true;
         try {
-          const saved = JSON.parse(window.sessionStorage.getItem(attemptStorageKey) || 'null');
+          const saved = JSON.parse(storage()?.getItem(attemptStorageKey) || 'null');
           if (saved && typeof saved.key === 'string' && typeof saved.fingerprint === 'string')
             request.current = saved;
         } catch {
@@ -297,6 +568,37 @@ function CheckoutForm() {
         totals,
       });
       const attempt = request.current;
+      if (shared.enabled) {
+        const nextAttempt =
+          attempt?.fingerprint === fingerprint
+            ? attempt
+            : { key: crypto.randomUUID(), fingerprint };
+        saveAttempt(nextAttempt);
+        const order = await shared.createOrder({
+          branchId: selectedBranchId,
+          customer: validated.customer,
+          fulfillment,
+          paymentMethod: method,
+          items: cart,
+          coupon,
+          idempotencyKey: nextAttempt.key,
+          expectedTotal: totals.total,
+          expectedRoundOffPolicy: 'nearest_rupee',
+        });
+        if (!checkoutIsCurrent()) return;
+        saveAttempt({ ...nextAttempt, orderId: order.id });
+        if (isCompletedCheckout(order)) {
+          finishDraft();
+          const current = useDemoStore.getState();
+          if (cartMatchesPlacedOrder(current.cart, order, current.selectedBranchId))
+            current.clearCart();
+          router.push(orderConfirmationHref(order));
+          return;
+        }
+        setPaymentOrderId(order.id);
+        setRetryReady(false);
+        return;
+      }
       const previous = attempt?.orderId
         ? useDemoStore.getState().orders.find((order) => order.id === attempt?.orderId)
         : undefined;
@@ -310,141 +612,57 @@ function CheckoutForm() {
       const order = createOrder({ ...validated, idempotencyKey: nextAttempt.key });
       saveAttempt({ ...nextAttempt, orderId: order.id });
       if (isCompletedCheckout(order)) {
-        fetch('/api/orders', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(order),
-        }).catch(() => {});
         finishDraft();
         router.push(`/order-success?id=${order.id}`);
         return;
       }
+      setPaymentOrderId(order.id);
       setRetryReady(false);
-      await startRazorpayPayment(order);
     } catch (err) {
       setError(
         err instanceof Error ? err.message : 'Unable to continue. Please check your details.',
       );
     } finally {
       submitting.current = false;
-    }
-  };
-  const startRazorpayPayment = async (targetOrder: Order) => {
-    if (!checkoutIsCurrent()) return;
-    setBusy(true);
-    setPaymentError('');
-    try {
-      fetch('/api/orders', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(targetOrder),
-      }).catch(() => {});
-
-      const res = await fetch('/api/payment/razorpay', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          orderId: targetOrder.id,
-          amount: targetOrder.total,
-          receipt: targetOrder.number,
-        }),
-      });
-
-      if (!res.ok) {
-        throw new Error('Payment gateway initialization failed.');
-      }
-
-      const data = await res.json();
-
-      if (data.mock || !data.keyId) {
-        if (checkoutIsCurrent()) {
-          setPaymentOrderId(targetOrder.id);
-          setBusy(false);
-        }
-        return;
-      }
-
-      await openRazorpayCheckout({
-        keyId: data.keyId,
-        amount: data.amount,
-        orderId: data.orderId,
-        appOrderId: targetOrder.id,
-        customerName: targetOrder.customer.name,
-        customerPhone: targetOrder.customer.phone,
-        onSuccess: async (rzpResponse) => {
-          if (!checkoutIsCurrent()) return;
-          setBusy(true);
-          try {
-            const verifyRes = await fetch('/api/payment/verify', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                orderId: targetOrder.id,
-                ...rzpResponse,
-              }),
-            });
-            const verifyData = await verifyRes.json();
-            if (!verifyRes.ok || !verifyData.success) {
-              throw new Error(verifyData.error || 'Payment signature verification failed.');
-            }
-
-            updatePaymentStatus(targetOrder.id, 'simulated_paid');
-            updateOrderStatus(targetOrder.id, 'confirmed');
-            finishDraft();
-            toast.success('Payment verified successfully! Order placed.');
-            router.push(`/order-success?id=${targetOrder.id}`);
-          } catch (verErr: unknown) {
-            const message = verErr instanceof Error ? verErr.message : 'Payment verification failed';
-            setPaymentError(message);
-            updatePaymentStatus(targetOrder.id, 'failed');
-            setPaymentOrderId(targetOrder.id);
-          } finally {
-            if (checkoutIsCurrent()) setBusy(false);
-          }
-        },
-        onDismiss: () => {
-          if (checkoutIsCurrent()) {
-            setBusy(false);
-            setPaymentOrderId(targetOrder.id);
-            toast.info('Payment window closed.');
-          }
-        },
-        onError: (err: unknown) => {
-          if (checkoutIsCurrent()) {
-            setBusy(false);
-            const message =
-              typeof err === 'object' && err !== null && 'description' in err
-                ? String((err as { description?: unknown }).description)
-                : err instanceof Error
-                  ? err.message
-                  : 'Payment failed';
-            setPaymentError(message);
-            setPaymentOrderId(targetOrder.id);
-          }
-        },
-      });
-    } catch {
-      if (checkoutIsCurrent()) {
-        setBusy(false);
-        setPaymentOrderId(targetOrder.id);
-      }
+      if (checkoutIsCurrent()) setBusy(false);
     }
   };
   const simulate = async (success: boolean) => {
-    if (!paymentOrder || busy || !checkoutIsCurrent()) return;
+    if (
+      !paymentOrder ||
+      busy ||
+      !checkoutIsCurrent() ||
+      !simulatorAvailable ||
+      isGatewayMode(paymentOrder.paymentMode)
+    )
+      return;
     setBusy(true);
     setPaymentError('');
     try {
-      updatePaymentStatus(paymentOrder.id, 'pending');
-      await new Promise((resolve) => setTimeout(resolve, 650));
+      let updatedOrder = paymentOrder;
+      if (shared.enabled) {
+        updatedOrder = await shared.simulatePayment(
+          paymentOrder.id,
+          success ? 'success' : 'failed',
+        );
+      } else {
+        updatePaymentStatus(paymentOrder.id, 'pending');
+        await new Promise((resolve) => setTimeout(resolve, 650));
+        if (!checkoutIsCurrent()) return;
+        const status = success ? 'simulated_paid' : 'failed';
+        updatePaymentStatus(paymentOrder.id, status);
+      }
       if (!checkoutIsCurrent()) return;
-      const status = success ? 'simulated_paid' : 'failed';
-      updatePaymentStatus(paymentOrder.id, status);
       setRetryReady(false);
       if (success) {
         finishDraft();
         toast.success('Demo payment simulated. No money was charged.');
-        router.push(`/order-success?id=${paymentOrder.id}`);
+        if (shared.enabled) {
+          const current = useDemoStore.getState();
+          if (cartMatchesPlacedOrder(current.cart, updatedOrder, current.selectedBranchId))
+            current.clearCart();
+        }
+        router.push(orderConfirmationHref(paymentOrder));
       }
     } catch (err) {
       if (checkoutIsCurrent())
@@ -459,16 +677,64 @@ function CheckoutForm() {
     if (!paymentOrder || busy || !checkoutIsCurrent()) return;
     setPaymentError('');
     try {
-      updatePaymentStatus(paymentOrder.id, 'pending');
-      router.push(`/order-success?id=${paymentOrder.id}`);
+      if (!shared.enabled) updatePaymentStatus(paymentOrder.id, 'pending');
+      router.push(orderConfirmationHref(paymentOrder));
     } catch (err) {
       setPaymentError(err instanceof Error ? err.message : 'Unable to update this payment.');
     }
   };
-  if (!hydrated || !draftReady)
+  if (!hydrated || !draftReady || (shared.enabled && !shared.ready && !shared.error))
     return (
       <div className="container empty-state" role="status">
         Opening your saved checkout…
+      </div>
+    );
+  if (shared.enabled && shared.error)
+    return (
+      <div className="container empty-state">
+        <h1>Let’s reconnect to the kitchen.</h1>
+        <p role="alert">{shared.error}</p>
+        <button className="btn btn-primary" onClick={() => void shared.refresh()}>
+          Try again
+        </button>
+      </div>
+    );
+  if (paymentOrder && isGatewayMode(paymentOrder.paymentMode))
+    return (
+      <div className="container journey-page checkout-experience">
+        <button type="button" className="back-link" onClick={() => setPaymentOrderId(null)}>
+          <ArrowLeft size={16} /> Back to checkout
+        </button>
+        <div className="page-heading">
+          <div>
+            <span className="eyebrow">
+              {isTestGatewayMode(paymentOrder.paymentMode) ? 'TEST PAYMENT' : 'SECURE PAYMENT'}
+            </span>
+            <h1>One last step.</h1>
+            <p>Order {paymentOrder.number} is saved. Complete payment for this order below.</p>
+          </div>
+        </div>
+        <OnlinePayment
+          order={paymentOrder}
+          onConfirmed={(updated) => {
+            if (!checkoutIsCurrent()) return;
+            if (!['cancelled', 'rejected'].includes(updated.status)) {
+              finishDraft();
+              const current = useDemoStore.getState();
+              if (cartMatchesPlacedOrder(current.cart, updated, current.selectedBranchId))
+                current.clearCart();
+            }
+            router.push(
+              orderConfirmationHref({
+                ...updated,
+                trackingUrl: updated.trackingUrl ?? paymentOrder.trackingUrl,
+              }),
+            );
+          }}
+        />
+        <Link className="text-link" href={orderConfirmationHref(paymentOrder)}>
+          View this order and payment status <ArrowRight size={16} />
+        </Link>
       </div>
     );
   if (!cart.length && !paymentOrder)
@@ -509,10 +775,13 @@ function CheckoutForm() {
         <h1>Checkout</h1>
         <p>Choose delivery or pickup, add your details and review your total.</p>
       </div>
-      {!customerSession && (
+      {(shared.enabled ? !auth.user : !customerSession) && (
         <p className="checkout-account-note">
           Continue as a guest, or{' '}
-          <Link href="/account/login?next=/checkout">sign in to see your orders together</Link>.
+          <Link href="/account/login?next=/checkout">
+            sign in to save addresses and see your orders together
+          </Link>
+          .
         </p>
       )}
       {(!settings.acceptingOrders || settings.temporarilyClosed) && (
@@ -584,19 +853,44 @@ function CheckoutForm() {
               <span>2</span>
               {fulfillment === 'delivery' ? 'Your delivery details' : 'Your contact details'}
             </h2>
-            {sessionPhone && fulfillment === 'delivery' && (
+            {canSaveAddress && shared.enabled && fulfillment === 'delivery' && (
+              <div className="checkout-address-feedback" role="status">
+                {addressBook.loading ? (
+                  'Loading your saved addresses…'
+                ) : addressBook.error ? (
+                  <>
+                    <p>{addressBook.error} You can still enter delivery details for this order.</p>
+                    <button
+                      type="button"
+                      className="btn btn-outline"
+                      onClick={() => void addressBook.refresh()}
+                    >
+                      Retry saved addresses
+                    </button>
+                  </>
+                ) : addressBook.addresses.length ? (
+                  'Choose an address saved to your account, or enter a new one.'
+                ) : (
+                  'Save a delivery address to use it on your next order.'
+                )}
+              </div>
+            )}
+            {canSaveAddress && fulfillment === 'delivery' && (
               <div className="checkout-address-picker">
                 <label className="field">
                   Saved address
                   <select
                     aria-label="Choose a saved delivery address"
+                    disabled={addressSaving || (shared.enabled && !cloudAddressesAvailable)}
                     value={selectedAddressId}
                     onChange={(event) => chooseAddress(event.target.value)}
                   >
                     <option value="">Use a new address</option>
-                    {selectedAddressState === 'removed' && (
+                    {(selectedAddressState === 'removed' ||
+                      (selectedAddressId && !selectedSavedAddress)) && (
                       <option value={selectedAddressId}>
-                        Previously selected address · Removed
+                        Previously selected address ·{' '}
+                        {selectedAddressState === 'removed' ? 'Removed' : 'Checking'}
                       </option>
                     )}
                     {customerAddresses.map((address) => (
@@ -612,7 +906,7 @@ function CheckoutForm() {
                 </Link>
               </div>
             )}
-            {sessionPhone && fulfillment === 'delivery' && selectedAddressStale && (
+            {canSaveAddress && fulfillment === 'delivery' && selectedAddressStale && (
               <div className="checkout-address-review" role="status">
                 <strong>
                   {selectedAddressState === 'removed'
@@ -626,10 +920,11 @@ function CheckoutForm() {
                   keep these details as a new address.
                 </p>
                 <div>
-                  {selectedSavedAddress && (
+                  {selectedSavedAddress && (!shared.enabled || cloudAddressesAvailable) && (
                     <button
                       type="button"
                       className="btn btn-outline"
+                      disabled={addressSaving}
                       onClick={() => chooseAddress(selectedAddressId)}
                     >
                       Use current saved version
@@ -638,12 +933,21 @@ function CheckoutForm() {
                   <button
                     type="button"
                     className="btn btn-outline"
+                    disabled={addressSaving}
                     onClick={() => {
+                      pendingAddressId.current = null;
                       setSelectedAddressId('');
                       setSelectedAddressSnapshot(null);
                       setAddressError('');
+                      setAddressConflict(false);
                       setAddressMessage('Your entered details are ready to save as a new address.');
-                      persistDraft({ selectedAddressId: '', selectedAddressSnapshot: null });
+                      setAddressRevision(shared.enabled ? addressBook.revision : null);
+                      persistDraft({
+                        selectedAddressId: '',
+                        selectedAddressSnapshot: null,
+                        selectedAddressRevision: shared.enabled ? addressBook.revision : null,
+                        addressTouched: true,
+                      });
                     }}
                   >
                     Keep details as a new address
@@ -673,13 +977,13 @@ function CheckoutForm() {
                   type="tel"
                   inputMode="tel"
                   autoComplete="tel"
-                  readOnly={!!customerSession}
+                  readOnly={!!sessionPhone}
                   maxLength={20}
                   value={customer.phone}
                   onChange={(e) => update('phone', e.target.value)}
                   placeholder="10-digit mobile number"
                 />
-                {customerSession && (
+                {sessionPhone && (
                   <small className="signed-in-phone-note">
                     Signed-in mobile · This order will appear in My orders.
                   </small>
@@ -773,7 +1077,7 @@ function CheckoutForm() {
                 pickup.
               </p>
             )}
-            {sessionPhone && fulfillment === 'delivery' && (
+            {canSaveAddress && fulfillment === 'delivery' && (
               <div className="checkout-save-address">
                 <label className="field">
                   Address label <span className="optional">Optional</span>
@@ -785,69 +1089,33 @@ function CheckoutForm() {
                     onChange={(event) => {
                       setAddressLabel(event.target.value);
                       setAddressMessage('');
-                      persistDraft({ addressLabel: event.target.value });
+                      persistDraft({ addressLabel: event.target.value, addressTouched: true });
                     }}
                   />
                 </label>
                 <button
                   type="button"
                   className="btn btn-outline"
-                  disabled={selectedAddressStale}
-                  onClick={() => {
-                    if (!checkoutIsCurrent()) return;
-                    setAddressError('');
-                    setAddressMessage('');
-                    try {
-                      const id = selectedAddressId || crypto.randomUUID();
-                      const label = addressLabel.trim() || 'Home';
-                      const input = {
-                        id,
-                        label,
-                        customer: { ...customer, instructions: '' },
-                        isDefault: selectedAddressSnapshot?.isDefault ?? false,
-                      };
-                      if (selectedAddressId) {
-                        if (!selectedAddressSnapshot)
-                          throw new Error('Review the saved address before updating it.');
-                        saveCustomerAddress(input, {
-                          mode: 'update',
-                          expectedOwnerPhone: sessionPhone,
-                          expected: selectedAddressSnapshot,
-                        });
-                      } else
-                        saveCustomerAddress(input, {
-                          mode: 'create',
-                          expectedOwnerPhone: sessionPhone,
-                        });
-                      const saved = getCustomerAddresses(
-                        useDemoStore.getState().savedAddresses,
-                        sessionPhone,
-                      ).find((address) => address.id === id)!;
-                      setSelectedAddressId(id);
-                      setSelectedAddressSnapshot(saved);
-                      setAddressLabel(label);
-                      persistDraft({
-                        selectedAddressId: id,
-                        addressLabel: label,
-                        selectedAddressSnapshot: saved,
-                      });
-                      setAddressMessage(
-                        selectedAddressId
-                          ? 'Saved address updated.'
-                          : 'Address saved for your next order.',
-                      );
-                    } catch (cause) {
-                      setAddressError(
-                        cause instanceof Error ? cause.message : 'Unable to save this address.',
-                      );
-                    }
-                  }}
+                  disabled={
+                    selectedAddressStale ||
+                    addressSaving ||
+                    addressBook.saving ||
+                    (shared.enabled && !cloudAddressesAvailable)
+                  }
+                  onClick={() => void saveAddress()}
                 >
-                  {selectedAddressId ? 'Update saved address' : 'Save this address'}
+                  {addressSaving
+                    ? 'Saving address…'
+                    : selectedAddressId
+                      ? 'Update saved address'
+                      : 'Save this address'}
                 </button>
                 <p className="field-help">
                   Addresses are saved only when you choose to save. Delivery instructions apply to
                   this order.
+                  {shared.enabled
+                    ? ' Saved addresses are available on your other devices after sign-in.'
+                    : ''}
                 </p>
                 {addressMessage && (
                   <p className="checkout-address-feedback" role="status">
@@ -869,8 +1137,20 @@ function CheckoutForm() {
             <div className="demo-payment-note">
               <ShieldCheck size={20} />
               <div>
-                <strong>Demo checkout · No money collected</strong>
-                <p>Never enter card details, bank information or a UPI PIN.</p>
+                <strong>
+                  {shared.onlinePayment
+                    ? shared.onlinePayment.mode === 'test'
+                      ? `${gatewayLabels[shared.onlinePayment.provider]} test mode · No real money charged`
+                      : `Secure payment with ${gatewayLabels[shared.onlinePayment.provider]}`
+                    : simulatorAvailable
+                      ? 'Demo checkout · No money collected'
+                      : 'Online payments are currently unavailable'}
+                </strong>
+                <p>
+                  {shared.onlinePayment
+                    ? `Payment details are entered only on ${gatewayLabels[shared.onlinePayment.provider]}’s secure payment page. Never share payment credentials with the restaurant.`
+                    : 'Never enter card details, bank information or a UPI PIN on this website.'}
+                </p>
               </div>
             </div>
             {!fulfillmentAvailable && (
@@ -878,9 +1158,15 @@ function CheckoutForm() {
                 Delivery and pickup are currently unavailable. Please try again later.
               </p>
             )}
-            {!settings.paymentMethods.length && (
+            {!availablePaymentMethods.length && (
               <p role="alert" className="error-message">
                 No payment method is currently available. Please try again later.
+              </p>
+            )}
+            {availablePaymentMethods.length > 0 && !availablePaymentMethods.includes('cash') && (
+              <p className="muted" role="status">
+                {fulfillment === 'pickup' ? 'Cash at pickup' : 'Cash on delivery'} is currently
+                unavailable. Choose another payment method below.
               </p>
             )}
             <div className="payment-methods">
@@ -895,7 +1181,7 @@ function CheckoutForm() {
                   ],
                 ] as const
               )
-                .filter(([value]) => settings.paymentMethods.includes(value))
+                .filter(([value]) => availablePaymentMethods.includes(value))
                 .map(([value, label, Icon]) => (
                   <label key={value} className={method === value ? 'selected' : ''}>
                     <input
@@ -910,7 +1196,13 @@ function CheckoutForm() {
                     />
                     <Icon size={21} />
                     <span>{label}</span>
-                    <small>{value === 'cash' ? 'On collection' : 'Demo payment'}</small>
+                    <small>
+                      {value === 'cash'
+                        ? 'On collection'
+                        : shared.onlinePayment
+                          ? `${gatewayLabels[shared.onlinePayment.provider]} checkout`
+                          : 'Demo payment'}
+                    </small>
                   </label>
                 ))}
             </div>
@@ -952,10 +1244,28 @@ function CheckoutForm() {
             aria-describedby={error ? 'checkout-error' : undefined}
             disabled={busy || !checkoutAvailable || minimumShortfall > 0}
           >
-            {method === 'cash' ? 'Place demo order' : 'Continue to demo payment'}
+            {busy
+              ? 'Sending order…'
+              : method === 'cash'
+                ? shared.enabled
+                  ? 'Place order'
+                  : 'Place demo order'
+                : shared.onlinePayment
+                  ? 'Continue to secure payment'
+                  : 'Continue to demo payment'}
             <ArrowRight size={17} />
           </button>
-          <p className="checkout-terms">Local demo only. Nothing is sent to the restaurant.</p>
+          <p className="checkout-terms">
+            {shared.enabled
+              ? shared.onlinePayment
+                ? shared.onlinePayment.mode === 'test'
+                  ? `Your test order is saved online. ${gatewayLabels[shared.onlinePayment.provider]} test payments do not charge real money.`
+                  : 'Your order is saved before payment. Payment is confirmed only after verification by our server.'
+                : simulatorAvailable
+                  ? 'Your order is sent to the restaurant. Online payments are simulated; no money is charged.'
+                  : 'Your order is sent to the restaurant. Only the payment methods shown here are available.'
+              : 'Local demo only. Nothing is sent to the restaurant.'}
+          </p>
         </OrderSummary>
       </form>
       {!paymentOrder && (
@@ -985,13 +1295,21 @@ function CheckoutForm() {
             aria-describedby={error ? 'checkout-error' : undefined}
             disabled={busy || !checkoutAvailable || checkoutTotal === null || minimumShortfall > 0}
           >
-            {method === 'cash' ? 'Place demo order' : 'Demo payment'}
+            {busy
+              ? 'Sending…'
+              : method === 'cash'
+                ? shared.enabled
+                  ? 'Place order'
+                  : 'Place demo order'
+                : shared.onlinePayment
+                  ? 'Secure payment'
+                  : 'Demo payment'}
             <ArrowRight size={17} />
           </button>
         </div>
       )}
       <Dialog
-        open={!!paymentOrder}
+        open={!!paymentOrder && simulatorAvailable && !isGatewayMode(paymentOrder.paymentMode)}
         onOpenChange={(open) => {
           if (!open && !busy) {
             setPaymentOrderId(null);
@@ -1033,7 +1351,7 @@ function CheckoutForm() {
               <button
                 className="btn btn-outline"
                 type="button"
-                onClick={() => router.push(`/order-success?id=${paymentOrder.id}`)}
+                onClick={() => router.push(orderConfirmationHref(paymentOrder))}
               >
                 View order
               </button>
@@ -1044,7 +1362,7 @@ function CheckoutForm() {
               <button
                 type="button"
                 className="btn btn-primary"
-                onClick={() => router.push(`/order-success?id=${paymentOrder?.id}`)}
+                onClick={() => paymentOrder && router.push(orderConfirmationHref(paymentOrder))}
               >
                 View your order <ArrowRight size={17} />
               </button>
@@ -1073,22 +1391,14 @@ function CheckoutForm() {
               <button
                 className="btn btn-ghost"
                 type="button"
-                onClick={() => router.push(`/order-success?id=${paymentOrder?.id}`)}
+                onClick={() => paymentOrder && router.push(orderConfirmationHref(paymentOrder))}
               >
                 View unpaid order
               </button>
             </>
           ) : (
             <div className="simulation-actions">
-              <button
-                type="button"
-                className="btn btn-primary"
-                onClick={() => paymentOrder && startRazorpayPayment(paymentOrder)}
-              >
-                <CreditCard size={18} />
-                Pay with Razorpay (UPI / Card)
-              </button>
-              <button type="button" className="btn btn-outline" onClick={() => simulate(true)}>
+              <button type="button" className="btn btn-primary" onClick={() => simulate(true)}>
                 <CheckCircle2 size={18} />
                 Simulate successful payment
               </button>
@@ -1102,7 +1412,9 @@ function CheckoutForm() {
               </button>
             </div>
           )}
-          <small className="muted">Use Razorpay for real/test payments, or use the simulator for instant local testing.</small>
+          <small className="muted">
+            This simulator does not connect to any payment gateway or bank.
+          </small>
         </DialogContent>
       </Dialog>
     </div>

@@ -1,9 +1,20 @@
 'use client';
+import {
+  gatewayLabels,
+  gatewayProvider,
+  isGatewayMode,
+  isTestGatewayMode,
+} from '@/lib/payments/method';
 
+import { useState } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { X } from 'lucide-react';
 import type { Order, OrderStatus } from '@/types';
-import { getAllowedOrderStatuses, isRevenueEligible as eligible } from '@/lib/pricing';
+import {
+  getAllowedOrderStatuses,
+  hasProcessedRefund,
+  isRevenueEligible as eligible,
+} from '@/lib/pricing';
 
 export const statusLabels: Record<OrderStatus, string> = {
   pending: 'Pending confirmation',
@@ -13,6 +24,8 @@ export const statusLabels: Record<OrderStatus, string> = {
   out_for_delivery: 'Out for delivery',
   delivered: 'Delivered',
   picked_up: 'Picked up',
+  served: 'Served',
+  closed: 'Closed',
   cancelled: 'Cancelled',
   rejected: 'Rejected',
 };
@@ -20,17 +33,34 @@ export function StatusPill({ status }: { status: OrderStatus }) {
   return <span className={`status-pill status-${status}`}>{statusLabels[status]}</span>;
 }
 export function PaymentPill({ order }: { order: Order }) {
+  const refunded = hasProcessedRefund(order);
   return (
     <span
-      className={`payment-label ${order.paymentStatus === 'simulated_paid' ? 'payment-paid' : ''}`}
+      className={`payment-label ${!refunded && !order.refundSyncPending && !order.paymentReviewRequired && ['simulated_paid', 'paid'].includes(order.paymentStatus) ? 'payment-paid' : ''}`}
     >
-      {order.paymentStatus === 'simulated_paid'
-        ? 'Paid · simulated'
-        : order.paymentStatus === 'failed'
-          ? 'Failed · demo'
-          : order.paymentMethod === 'cash'
-            ? 'Cash · unpaid'
-            : `${order.paymentStatus} · demo`}
+      {order.refundSyncPending
+        ? `Refund needs reconciliation${isTestGatewayMode(order.paymentMode) ? ' · test' : ''}`
+        : refunded
+          ? `${order.refund?.status === 'full' ? 'Refunded' : 'Partial refund'}${isTestGatewayMode(order.paymentMode) ? ' · test' : ''}`
+          : order.paymentReviewRequired
+            ? 'Payment needs review'
+            : order.paymentMode === 'counter_manual'
+              ? order.paymentStatus === 'paid'
+                ? `${order.paymentMethod === 'cash' ? 'Cash' : 'UPI'} received · staff confirmed`
+                : 'Unpaid · pay later approved'
+              : order.paymentStatus === 'paid'
+                ? isTestGatewayMode(order.paymentMode)
+                  ? 'Captured · test'
+                  : 'Paid · verified'
+                : order.paymentStatus === 'simulated_paid'
+                  ? 'Paid · simulated'
+                  : order.paymentStatus === 'failed'
+                    ? isGatewayMode(order.paymentMode)
+                      ? 'Failed'
+                      : 'Failed · demo'
+                    : order.paymentMethod === 'cash'
+                      ? 'Cash · unpaid'
+                      : `${order.paymentStatus}${gatewayProvider(order.paymentMode) ? ` · ${gatewayLabels[gatewayProvider(order.paymentMode)!]}` : ' · demo'}`}
     </span>
   );
 }
@@ -87,12 +117,18 @@ export function ConfirmAction({
   onOpenChange: (open: boolean) => void;
   title: string;
   description: string;
-  onConfirm: () => void;
+  onConfirm: () => void | Promise<void>;
   destructive?: boolean;
   label?: string;
 }) {
+  const [pending, setPending] = useState(false);
   return (
-    <Dialog.Root open={open} onOpenChange={onOpenChange}>
+    <Dialog.Root
+      open={open}
+      onOpenChange={(next) => {
+        if (!pending) onOpenChange(next);
+      }}
+    >
       <Dialog.Portal>
         <Dialog.Overlay className="admin-dialog-overlay" />
         <Dialog.Content className="admin-dialog">
@@ -102,15 +138,23 @@ export function ConfirmAction({
             <X size={18} />
           </Dialog.Close>
           <div className="admin-actions">
-            <Dialog.Close className="btn btn-outline">Go back</Dialog.Close>
+            <Dialog.Close className="btn btn-outline" disabled={pending}>
+              Go back
+            </Dialog.Close>
             <button
               className={`btn ${destructive ? 'btn-primary' : 'btn-dark'}`}
-              onClick={() => {
-                onConfirm();
-                onOpenChange(false);
+              disabled={pending}
+              onClick={async () => {
+                setPending(true);
+                try {
+                  await onConfirm();
+                  onOpenChange(false);
+                } finally {
+                  setPending(false);
+                }
               }}
             >
-              {label}
+              {pending ? 'Saving…' : label}
             </button>
           </div>
         </Dialog.Content>

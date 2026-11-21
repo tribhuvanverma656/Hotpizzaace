@@ -9,15 +9,15 @@ export function HomeCoupon() {
   const active = isCouponActive(settings);
   return (
     <div className="coupon-card">
-      <span>A LITTLE EXTRA HAPPINESS</span>
+      <span>OFFERS & COMBOS</span>
       <h3>
-        A little treat
+        Explore our
         <br />
-        on the house.
+        latest offers.
       </h3>
       <p>
         {active
-          ? 'Try our demo coupon at checkout.'
+          ? 'Apply this coupon at checkout.'
           : 'Find something delicious for your next pizza night.'}
       </p>
       {active ? (
@@ -29,12 +29,12 @@ export function HomeCoupon() {
           <small>
             Orders {money(settings.couponMinimum)}+ · Up to {money(settings.couponMaximum)} off
             <br />
-            Illustrative demo offer.
+            Discount shown before payment.
           </small>
         </>
       ) : (
         <div className="coupon-code">
-          SAY CHEESE!<span>MADE FRESH</span>
+          EXPLORE COMBOS<span>MADE FRESH</span>
         </div>
       )}
       <Link href="/menu">

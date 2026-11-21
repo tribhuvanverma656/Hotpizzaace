@@ -4,9 +4,17 @@ import { LogIn, LogOut, ShoppingBag, MapPin } from 'lucide-react';
 import { useDemoStore } from '@/lib/store';
 import { getOrdersForCustomer } from '@/lib/order-tracking';
 import { LocalOrderList } from '@/components/local-order-list';
+import { useCustomerAuth } from '@/components/customer-auth-provider';
+import { CustomerGoogleAccount } from '@/components/customer-google-account';
+import { useSharedCommerce } from '@/components/shared-commerce-provider';
+import { SharedOrderHistory } from '@/components/shared-order-history';
 
 export default function OrderHistory() {
   const { orders, customerSession, hydrated, logoutCustomer } = useDemoStore();
+  const auth = useCustomerAuth();
+  const shared = useSharedCommerce();
+  if (shared.enabled) return <SharedOrderHistory />;
+  if (auth.loading || auth.error || auth.user) return <CustomerGoogleAccount section="orders" />;
   if (!hydrated)
     return (
       <div className="container empty-state" role="status">

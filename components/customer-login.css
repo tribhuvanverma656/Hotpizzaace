@@ -1,6 +1,32 @@
 .customer-login-page {
   padding-block: 42px 78px;
 }
+.customer-profile-card {
+  max-width: 620px;
+  margin: 20px auto;
+}
+.customer-profile-card h1 {
+  font-size: clamp(30px, 5vw, 44px);
+  margin-top: 12px;
+  overflow-wrap: anywhere;
+}
+.customer-profile-card h2 {
+  margin-top: 24px;
+}
+.customer-auth-verified {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--green, #40764b);
+  margin-top: 18px;
+  font-weight: 600;
+}
+.customer-profile-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 26px;
+}
 .customer-login-layout {
   display: grid;
   grid-template-columns: 1fr minmax(340px, 440px);
@@ -50,6 +76,7 @@
   max-width: 290px;
 }
 .customer-login-card {
+  min-width: 0;
   padding: 32px;
   background: var(--paper);
   border: 1px solid var(--line);
@@ -72,7 +99,7 @@
   align-items: center;
   gap: 4px;
   color: var(--muted);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
 }
 .customer-login-steps > span:nth-child(2) {
@@ -86,6 +113,137 @@
 .customer-login-card h2 {
   font-size: 27px;
   line-height: 1.15;
+}
+.customer-google-form {
+  margin-top: 26px;
+}
+.customer-google-error {
+  margin-top: 18px;
+}
+.customer-mobile-demo {
+  margin-top: 25px;
+  border-top: 1px solid var(--line);
+}
+.customer-mobile-demo > summary {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 55px;
+  padding-block: 16px;
+  color: var(--muted);
+  cursor: pointer;
+  list-style: none;
+  font-size: 12px;
+  font-weight: 600;
+}
+.customer-mobile-demo > summary::-webkit-details-marker {
+  display: none;
+}
+.customer-mobile-demo > summary > svg {
+  flex-shrink: 0;
+}
+.customer-mobile-demo > summary > svg:last-child {
+  margin-left: auto;
+}
+.customer-mobile-demo[open] > summary > svg:last-child {
+  transform: rotate(180deg);
+}
+.customer-mobile-demo > summary:focus-visible {
+  outline: 2px solid var(--red);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+.customer-mobile-demo-content {
+  padding-bottom: 4px;
+}
+.customer-demo-explanation {
+  padding: 11px 13px;
+  border-radius: 8px;
+  background: #f8f3e9;
+  color: #78684b;
+  font-size: 12px;
+  line-height: 1.65;
+  margin-bottom: 18px;
+}
+.customer-mobile-demo .customer-login-form {
+  margin-top: 18px;
+}
+.customer-mobile-demo .customer-login-steps {
+  margin-bottom: 0;
+}
+.customer-account-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 13px;
+  color: var(--green);
+  font-size: 12px;
+  font-weight: 700;
+}
+.customer-signed-in-profile {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 17px 0 23px;
+}
+.customer-profile-avatar {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #f6ece1;
+  color: var(--red);
+  font-size: 18px;
+  font-weight: 700;
+}
+.customer-signed-in-profile > div {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.customer-signed-in-profile strong {
+  font-size: 14px;
+}
+.customer-signed-in-profile > div > span {
+  color: var(--muted);
+  font-size: 12px;
+}
+.customer-account-continue {
+  width: 100%;
+}
+.customer-profile-link {
+  display: block;
+  margin-top: 18px;
+  text-align: center;
+  color: var(--red);
+  font-size: 12px;
+  font-weight: 600;
+}
+.customer-switch-account {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 12px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.customer-demo-session > strong {
+  font-size: 13px;
+}
+.customer-demo-session > p {
+  margin: 7px 0 16px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.customer-demo-session > .btn {
+  width: 100%;
+  white-space: normal;
 }
 .customer-login-description {
   color: var(--muted);
@@ -107,7 +265,7 @@
 }
 .customer-login-form .field small {
   color: var(--muted);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 400;
   line-height: 1.5;
 }
@@ -122,7 +280,7 @@
 }
 .customer-demo-code span {
   display: block;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
 }
 .customer-demo-code strong {
@@ -150,11 +308,11 @@
   font-weight: 700;
 }
 .customer-login-disclaimer {
-  margin-top: 25px;
-  padding-top: 20px;
+  margin-top: 7px;
+  padding-top: 17px;
   border-top: 1px solid var(--line);
   color: var(--muted);
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.6;
 }
 .customer-login-disclaimer strong {
@@ -175,6 +333,9 @@
   }
   .customer-login-intro h1 {
     font-size: 42px;
+  }
+  .customer-login-intro h1 em {
+    margin-left: 0.2em;
   }
   .customer-login-intro h1 br {
     display: none;

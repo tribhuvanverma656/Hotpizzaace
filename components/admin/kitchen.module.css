@@ -1,0 +1,374 @@
+.screen {
+  max-width: 1600px;
+  margin: auto;
+  color: #20291e;
+}
+.heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.heading p {
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  font-weight: 800;
+  color: #54734a;
+  margin: 0 0 6px;
+}
+.heading h1 {
+  font-size: clamp(24px, 2.2vw, 30px);
+  line-height: 1.1;
+  margin: 0 0 6px;
+}
+.heading span {
+  font-size: 14px;
+  font-weight: 650;
+}
+.hint {
+  font-size: 13px;
+  color: #5e6859;
+  max-width: 900px;
+  line-height: 1.4;
+  margin-bottom: 14px;
+}
+.branch {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+  background: #edf2e7;
+  border: 1px solid #ccd8c2;
+  border-radius: 10px;
+}
+.branch label {
+  display: grid;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 750;
+  min-width: min(220px, 100%);
+}
+.branch select {
+  padding: 8px 10px;
+  background: #fffef9;
+  color: #20291e;
+  border: 1px solid #9cad8f;
+  border-radius: 10px;
+  font: inherit;
+  font-size: 15px;
+  width: 100%;
+  min-height: 44px;
+}
+.branch strong {
+  font-size: 14px;
+}
+.branch p {
+  font-size: 12px;
+  margin: 4px 0 0;
+  line-height: 1.4;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+  gap: 12px;
+  align-items: start;
+}
+.ticket {
+  background: #fffef9;
+  border: 2px solid #dce2d5;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 5px 24px #22311c08;
+}
+.ticketTop {
+  padding: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 8px;
+  flex-wrap: wrap;
+  background: #f1f4ea;
+}
+.mode {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+}
+.ticketTop h2 {
+  font-size: 14px;
+  overflow-wrap: anywhere;
+  margin: 6px 0 0;
+}
+.elapsed {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 750;
+}
+.state {
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 800;
+  border-bottom: 1px solid #e0e4d9;
+}
+.items {
+  list-style: none;
+  padding: 0 12px;
+  margin: 0;
+}
+.items li {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr);
+  gap: 8px;
+  padding: 12px 0;
+  border-bottom: 1px solid #e5e8df;
+}
+.items li:last-child {
+  border-bottom: 0;
+}
+.quantity {
+  font-size: 22px;
+  font-weight: 850;
+  line-height: 1.15;
+  color: #d93723;
+}
+.items h3 {
+  font-size: 17px;
+  line-height: 1.25;
+  margin: 0 0 5px;
+  overflow-wrap: anywhere;
+}
+.options {
+  font-size: 14px;
+  line-height: 1.4;
+  margin: 0;
+  color: #3f4a39;
+}
+.note {
+  margin: 8px 0 0;
+  padding: 8px 10px;
+  background: #fff0ce;
+  border-left: 4px solid #b97b10;
+  font-size: 14px;
+  line-height: 1.4;
+  color: #55370b;
+  overflow-wrap: anywhere;
+}
+.note strong {
+  display: block;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  margin-bottom: 4px;
+}
+.action {
+  width: calc(100% - 24px);
+  margin: 8px 12px 12px;
+  background: #2f5834;
+  border: 0;
+  border-radius: 8px;
+  color: white;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.action:hover {
+  background: #24442a;
+}
+.action:focus-visible {
+  outline: 4px solid #e8ae3c;
+  outline-offset: 4px;
+}
+.action:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+.test {
+  padding: 8px 12px;
+  background: #fff1da;
+  font-size: 12px;
+  font-weight: 800;
+  color: #80500f;
+}
+.error {
+  background: #fff0ed;
+  border: 1px solid #e1a399;
+  color: #9f2a1d;
+  border-radius: 12px;
+  padding: 12px;
+  font-size: 14px;
+}
+.empty {
+  text-align: center;
+  padding: 35px 20px;
+  background: white;
+  border: 2px dashed #ccd5c6;
+  border-radius: 22px;
+}
+.empty svg {
+  color: #557349;
+}
+.empty h2 {
+  font-size: 22px;
+}
+.empty p {
+  font-size: 14px;
+  line-height: 1.5;
+  max-width: 580px;
+  margin: 10px auto 18px;
+}
+@media (max-width: 600px) {
+  .branch {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  .heading {
+    align-items: start;
+    flex-direction: column;
+  }
+}
+
+.unpaid {
+  margin: 8px 12px 0;
+  padding: 8px 10px;
+  background: #fff1df;
+  color: #924514;
+  border: 1px solid #edc793;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+details.hint summary {
+  cursor: pointer;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  font-weight: 650;
+}
+@media (max-width: 600px) {
+  .heading h1 {
+    font-size: 22px;
+  }
+  .heading > button {
+    min-height: 44px;
+    flex-shrink: 0;
+  }
+  .branch {
+    padding: 8px 10px;
+    gap: 8px;
+  }
+  .branch label {
+    width: 100%;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: 10px;
+  }
+  .branch select {
+    min-height: 44px;
+  }
+  .branch > div {
+    display: none;
+  }
+  details.hint {
+    margin-bottom: 8px;
+  }
+}
+
+.headingActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+.readySection {
+  margin-top: 28px;
+  border-top: 1px solid #e3e5dc;
+  padding-top: 18px;
+}
+.readySection h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 20px;
+  margin: 0 0 12px;
+}
+.readySection h2 span {
+  min-width: 28px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: #e6f2e0;
+  color: #2f5a24;
+  font-size: 14px;
+  text-align: center;
+}
+.readyEmpty {
+  color: #6b7262;
+  margin: 0;
+}
+.readyList {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 12px;
+}
+.readyCard {
+  background: #f6f8f2;
+  border: 1px solid #dfe6d6;
+  border-radius: 14px;
+  padding: 14px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.readyCard header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 4px 10px;
+  margin-bottom: 4px;
+}
+.readyCard header strong {
+  font-size: 16px;
+}
+.readyCard header span,
+.readyMeta {
+  color: #5d6655;
+  font-size: 13px;
+}
+.readyMeta {
+  margin: 0 0 8px;
+}
+.readyCard ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 4px;
+  font-size: 14px;
+}
+.readyCard small {
+  color: #6b7262;
+}
+@media (max-width: 600px) {
+  .heading {
+    flex-wrap: wrap;
+  }
+  .headingActions {
+    width: 100%;
+    justify-content: stretch;
+  }
+  .headingActions > * {
+    flex: 1;
+  }
+}

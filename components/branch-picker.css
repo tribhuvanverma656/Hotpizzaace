@@ -29,7 +29,7 @@ button.branch-picker-trigger > span {
 button.branch-picker-trigger small {
   display: block;
   margin-bottom: 2px;
-  font-size: 9px;
+  font-size: 12px;
   line-height: 1.4;
 }
 
@@ -56,7 +56,7 @@ button.branch-picker-trigger strong {
   display: block;
   margin-bottom: 11px;
   color: #9b8062;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 650;
   letter-spacing: 1.8px;
 }
@@ -195,14 +195,14 @@ button.branch-picker-trigger strong {
   flex-shrink: 0;
   gap: 4px;
   color: #64804d;
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .branch-picker-dialog .branch-picker-availability {
   display: inline-block;
   margin-top: 8px;
   color: #66804d;
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .branch-picker-dialog .branch-picker-unavailable {
@@ -247,7 +247,7 @@ button.branch-picker-trigger strong {
   border-radius: 5px;
   background: #f6f5ee;
   color: #81745f;
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .branch-picker-dialog .branch-picker-select {
@@ -261,7 +261,7 @@ button.branch-picker-trigger strong {
 .branch-picker-dialog .branch-picker-footer-note {
   margin-top: 18px;
   color: #9b9488;
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.7;
 }
 
@@ -329,11 +329,11 @@ button.branch-picker-trigger:focus-visible,
   }
 
   button.branch-picker-trigger small {
-    font-size: 8px;
+    font-size: 12px;
   }
 
   button.branch-picker-trigger strong {
-    font-size: 11px;
+    font-size: 12px;
   }
 
   .dialog-content.branch-picker-dialog {

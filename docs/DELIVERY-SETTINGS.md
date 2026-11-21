@@ -4,7 +4,11 @@ The confirmed policy is **₹49 delivery below ₹250 food subtotal, free delive
 
 Admin → Restaurant settings → Delivery & pickup allows editing the delivery charge, enabling/disabling a free-delivery threshold and changing that threshold. Disabling the threshold applies the configured fee to all delivery orders. A zero delivery fee makes all delivery free. Save settings applies the draft to the storefront, cart, checkout and new orders.
 
-Payment options exposes **Enable Cash on Delivery (COD)**. Uncheck it and Save settings to remove cash from delivery and pickup checkout. At least one payment method must remain enabled. Existing orders and their recorded delivery fees/payment methods are preserved.
+Payment options exposes **Enable Cash on Delivery (COD)**. Payment switches now save immediately, independently of unsaved restaurant/profile fields. Uncheck COD to remove cash from delivery and pickup checkout. The card displays the current saved COD state. At least one payment method must remain enabled. Existing orders and their recorded delivery fees/payment methods are preserved. Kitchen and other fields still use Save settings.
+
+Settings forms retain their original saved snapshot. If another tab changes the branch settings, the page keeps unsaved edits, shows a conflict and disables form saving until Load latest settings is selected. A final snapshot check in the store also rejects a stale save. Payment switches always display the latest saved value and update only their targeted payment method.
+
+Checkout and settings writes synchronously check for another tab's completed local-storage save before trusting in-memory state. This closes the tested window before the asynchronous storage event arrives. The last-successful-storage cache prevents a failed local write from causing newer in-memory cart/settings changes to be replaced by an older saved snapshot. This remains a local demo, not an atomic multi-client database. See [COD QA](COD-QA.md).
 
 The shared pricing calculation applies the rule to cart and checkout totals and is called again when creating an order. The checkout delivery selector shows the current calculated fee. Customers see the threshold and any remaining food subtotal required for free delivery.
 
