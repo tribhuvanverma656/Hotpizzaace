@@ -17,6 +17,16 @@
       "env": {
         "EXPO_PUBLIC_WEBSITE_URL": "https://hotpizzaace.com"
       }
+    },
+    "production-apk": {
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_WEBSITE_URL": "https://hotpizzaace.com"
+      },
+      "environment": "production"
     }
   }
 }

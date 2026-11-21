@@ -8,7 +8,7 @@ A restaurant ordering platform with a customer website, QR ordering, counter man
 **Live website:** [hotpizzaace.com](https://hotpizzaace.com)  
 **Project maintained by:** [Tribhuvan Verma](https://github.com/tribhuvanverma656)
 
-This public repository contains the current website source and the customer app preview. The app is still being tested; an APK, iPhone test build and store release are not available yet. The deployed website and this development snapshot can differ.
+This public repository contains the website and customer app source. An installable Android APK connected to the live website is available from the Expo build linked below. iPhone device acceptance and store distribution remain pending. The deployed website and this development snapshot can differ.
 
 ## Website features
 
@@ -34,7 +34,9 @@ The `mobile/` directory contains an Expo/React Native app for Android and iPhone
 - Website/app food symbols share the same category mapping.
 - Secure cart handoff to the existing website checkout. Login, payment and tracking currently open the website in the system browser.
 
-The app defaults to the isolated staging website. Native-device testing, final launcher artwork, signing and store distribution remain pending. See [mobile setup](mobile/README.md).
+The source defaults to the isolated staging website. The signed `production-apk` profile selects the live website. Launcher images use the restaurant logo. Physical-device acceptance and store distribution remain pending. See [mobile setup](mobile/README.md).
+
+**Android production APK:** [Expo build and download](https://expo.dev/accounts/hotpizzaaces-team/projects/hot-pizza-ace/builds/8d92e908-adb2-4dd0-8278-c91d9d49ee59). Login, payment and tracking open the existing website in the system browser.
 
 ## Technology
 
