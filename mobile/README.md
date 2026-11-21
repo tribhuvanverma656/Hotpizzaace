@@ -43,6 +43,6 @@ The repository's root test suite includes `tests/mobile-cart.test.ts` for forged
 
 ## Signed device builds / store publishing
 
-`eas.json` contains an internal staging APK preview profile and a future production profile. Actual builds require an authorized Expo account/project. iPhone distribution also needs Apple signing/provisioning; store publishing needs the owner's Apple/Google developer accounts.
+`eas.json` contains an internal staging APK preview profile and a future production profile. The app is linked to the authorized `hotpizzaaces-team/hot-pizza-ace` Expo project. iPhone distribution also needs Apple signing/provisioning; store publishing needs the owner's Apple/Google developer accounts.
 
-No APK, IPA, TestFlight build or store listing has been created yet. Native-device payment/app-return and sign-in tests are still required. App-store icon/splash artwork is not finalized (template launcher assets remain). Push notifications and fully native authenticated account/order screens are not implemented in this first version.
+The Android staging APK build has been submitted to EAS; use its current build status before claiming an installable artifact. No IPA, TestFlight build or store listing has been created yet. Native-device payment/app-return and sign-in tests are still required. Native launcher images use the original restaurant logo with Android safe-area padding; store artwork still needs review. Push notifications and fully native authenticated account/order screens are not implemented in this first version.

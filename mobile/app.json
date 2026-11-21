@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Hot Pizza Ace",
-    "slug": "hotpizzaace-customer",
+    "slug": "hot-pizza-ace",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -13,9 +13,7 @@
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#FAF8F1",
-        "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundImage": "./assets/android-icon-background.png",
-        "monochromeImage": "./assets/android-icon-monochrome.png"
+        "foregroundImage": "./assets/android-icon-foreground.png"
       },
       "predictiveBackGestureEnabled": false,
       "package": "com.hotpizzaace.customer"
@@ -32,6 +30,17 @@
     "scheme": "hotpizzaace",
     "experiments": {
       "typedRoutes": true
+    },
+    "owner": "hotpizzaaces-team",
+    "extra": {
+      "router": {
+        "asyncRoutes": {
+          "web": true
+        }
+      },
+      "eas": {
+        "projectId": "209f84b5-eddb-4d73-bd25-b55fbc3e2276"
+      }
     }
   }
 }
