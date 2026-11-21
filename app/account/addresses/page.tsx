@@ -20,6 +20,9 @@ import { useDemoStore } from '@/lib/store';
 import { getCustomerAddresses } from '@/lib/customer-addresses';
 import type { SavedAddress } from '@/types';
 import { CustomerAddressForm } from '@/components/customer-address-form';
+import { useCustomerAuth } from '@/components/customer-auth-provider';
+import { CustomerGoogleAccount } from '@/components/customer-google-account';
+import { useSharedCommerce } from '@/components/shared-commerce-provider';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 import './addresses.css';
 
@@ -43,6 +46,10 @@ function sameAddress(first: SavedAddress, second: SavedAddress) {
 
 export default function CustomerAddressesPage() {
   const { customerSession, hydrated } = useDemoStore();
+  const auth = useCustomerAuth();
+  const shared = useSharedCommerce();
+  if (shared.enabled || auth.loading || auth.error || auth.user)
+    return <CustomerGoogleAccount section="addresses" />;
   if (!hydrated)
     return (
       <div className="container empty-state" role="status">

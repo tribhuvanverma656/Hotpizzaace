@@ -1,0 +1,62 @@
+.mobileTotal {
+  display: none;
+}
+
+@media (max-width: 700px) {
+  .page {
+    padding-bottom: calc(144px + env(safe-area-inset-bottom));
+  }
+
+  :global(body):has(.page) :global(.site-footer) {
+    padding-bottom: calc(144px + env(safe-area-inset-bottom));
+  }
+
+  .checkoutAction {
+    position: fixed;
+    inset: auto 0 0;
+    z-index: 40;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px max(16px, env(safe-area-inset-right)) calc(14px + env(safe-area-inset-bottom))
+      max(16px, env(safe-area-inset-left));
+    border-top: 1px solid var(--line);
+    background: var(--paper);
+    box-shadow: 0 -5px 24px rgb(37 37 32 / 7%);
+  }
+
+  .mobileTotal {
+    display: grid;
+    flex-shrink: 0;
+    gap: 3px;
+  }
+
+  .mobileTotal > span {
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.4;
+  }
+
+  .mobileTotal > strong {
+    font-size: 22px;
+    line-height: 1.2;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .checkoutAction > .checkoutLink {
+    width: auto;
+    min-height: 48px;
+    gap: 10px;
+    margin: 0;
+    margin-left: auto;
+    padding: 13px 15px;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  .checkoutLink > svg {
+    flex-shrink: 0;
+  }
+}

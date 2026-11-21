@@ -1,0 +1,302 @@
+/*
+ * Mobile polish (customer storefront). Loaded after the other customer styles.
+ * Goals from the 6 Nov 2026 mobile audit: readable type (12px floor, 16px inputs),
+ * 44px tap targets, a single-row sticky header, no sideways scrolling and a denser
+ * dish list. Layout only: no pricing, ordering or validation behaviour lives here.
+ */
+:root {
+  --tap: 44px;
+}
+
+/* Inputs below 16px make iOS Safari zoom the page on focus. */
+@media (max-width: 900px) {
+  input:not([type='checkbox']):not([type='radio']):not([type='range']),
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* Decorative artwork must never widen the page. */
+html,
+body {
+  overflow-x: clip;
+}
+
+@media (max-width: 700px) {
+  /* ---------- Header: one 60px row ---------- */
+  .announcement {
+    height: 26px;
+    padding-inline: 16px;
+    justify-content: center;
+  }
+  .announcement > span:first-child {
+    display: none;
+  }
+  .announcement .demo-dot {
+    position: static;
+    font-size: 12px;
+  }
+  .site-header .nav-row {
+    grid-template-columns: 52px minmax(0, 1fr) auto auto;
+    gap: 6px;
+    height: 60px;
+  }
+  .restaurant-logo--header {
+    width: 52px;
+  }
+  .brand.restaurant-brand {
+    min-width: 52px;
+  }
+  .site-header .mobile-order-links {
+    display: none;
+  }
+  .site-header .cart-nav {
+    min-height: var(--tap);
+    min-width: var(--tap);
+    justify-content: center;
+  }
+  .site-header .mobile-menu {
+    display: inline-grid;
+    place-items: center;
+    width: var(--tap);
+    min-width: var(--tap);
+    height: var(--tap);
+    padding: 0;
+  }
+  .site-header .branch-picker-trigger {
+    min-height: var(--tap);
+  }
+  .site-header .branch-picker-trigger small {
+    font-size: 12px;
+    line-height: 1.2;
+    white-space: nowrap;
+  }
+  .site-header .branch-picker-trigger strong {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .site-header .branch-picker-trigger strong {
+    font-size: 13px;
+    line-height: 1.25;
+  }
+  .mobile-nav > a {
+    min-height: 48px;
+    font-size: 15px;
+  }
+  html {
+    scroll-padding-top: 130px;
+  }
+
+  /* ---------- Footer and inline links: 44px tap height ---------- */
+  .site-footer .footer-top a,
+  .footer-policy-links a,
+  .footer-bottom a,
+  .restaurant-social-links a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--tap);
+  }
+  .site-footer .footer-top > div {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .footer-policy-links {
+    gap: 0 18px;
+  }
+  .footer-policy-links a {
+    font-size: 13px;
+  }
+
+  /* ---------- Menu: compact dish rows (about 150px instead of 200px) ---------- */
+  .menu-layout .product-card {
+    grid-template-columns: 68px minmax(0, 1fr);
+    grid-template-rows: auto auto auto auto;
+    column-gap: 0;
+    padding-bottom: 6px;
+  }
+  .menu-layout .product-photo {
+    grid-column: 1;
+    grid-row: 1 / 4;
+    width: 56px;
+    height: 56px;
+    margin: 12px 0 0 12px;
+  }
+  .menu-layout .product-body > h3 {
+    grid-column: 2;
+    grid-row: 1;
+    font-size: 15px;
+    line-height: 1.35;
+    margin: 12px 12px 2px 10px;
+    align-self: start;
+  }
+  .menu-layout .product-body > h3 a {
+    display: block;
+  }
+  .menu-layout .product-body > p {
+    grid-column: 2;
+    grid-row: 2;
+    font-size: 13px;
+    line-height: 1.45;
+    margin: 0 12px 6px 10px;
+  }
+  .menu-layout .product-bottom {
+    grid-column: 2;
+    grid-row: 3;
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    margin: 0;
+    padding: 0 12px 0 10px;
+  }
+  .menu-layout .product-bottom {
+    flex-wrap: wrap;
+    row-gap: 6px;
+  }
+  .menu-layout .product-bottom > div {
+    flex-shrink: 0;
+  }
+  .menu-layout .product-bottom > .card-quantity {
+    margin-left: auto;
+  }
+  .menu-layout .product-bottom > div > span {
+    font-size: 12px;
+    margin-bottom: 1px;
+  }
+  .menu-layout .product-bottom strong {
+    font-size: 17px;
+    white-space: nowrap;
+  }
+  .menu-layout .add-button {
+    min-height: var(--tap);
+    min-width: 72px;
+    padding: 8px 10px;
+    font-size: 14px;
+  }
+  .menu-layout .card-quantity > span {
+    min-width: 26px;
+  }
+  .menu-layout .customizable {
+    grid-column: 1 / -1;
+    grid-row: 4;
+    border: 0;
+    margin: 0;
+    padding: 4px 12px 6px;
+    min-height: 0;
+    text-align: right;
+  }
+  .menu-layout span.customizable {
+    display: none;
+  }
+  .menu-layout .customizable-button {
+    justify-self: end;
+    position: relative;
+    font-size: 13px;
+    color: var(--red-dark);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    background: transparent;
+    line-height: 1.6;
+  }
+  /* Invisible 44px hit area around the small text link. */
+  .menu-layout .customizable-button::after {
+    content: '';
+    position: absolute;
+    inset: -10px 0;
+  }
+  .menu-layout .cart-config-note {
+    grid-column: 1 / -1;
+    grid-row: 5;
+    padding: 0 12px 6px;
+  }
+  .back-link,
+  .text-link,
+  .journey-page .page-heading a,
+  .customer-login-back {
+    min-height: var(--tap);
+    display: inline-flex;
+    align-items: center;
+  }
+  .menu-layout .menu-tools .search-field input::placeholder {
+    font-size: 15px;
+  }
+
+  /* ---------- Home ---------- */
+  .home-menu .customizable-button {
+    min-height: var(--tap);
+  }
+
+  /* ---------- Cart: food first ---------- */
+  .cart-page .recent-order-shortcut,
+  .cart-page .order-tracking-shortcut {
+    order: 10;
+  }
+
+  /* ---------- Checkout ---------- */
+  .checkout-experience.checkout-experience {
+    padding-bottom: calc(120px + env(safe-area-inset-bottom));
+  }
+  .checkout-experience .form-grid > .checkout-optional,
+  .checkout-experience .form-grid > details,
+  .checkout-experience .form-grid > .full-width {
+    grid-column: 1 / -1;
+  }
+  .checkout-mobile-bar.checkout-mobile-bar {
+    padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+    gap: 6px 14px;
+  }
+  .checkout-mobile-total strong {
+    font-size: 22px;
+  }
+  .checkout-mobile-bar.checkout-mobile-bar .btn {
+    font-size: 15px;
+    min-height: 48px;
+  }
+  .checkout-mobile-bar.checkout-mobile-bar .btn:disabled {
+    opacity: 1;
+    background: #ece6dc;
+    border-color: #ece6dc;
+    color: #5f5b50;
+  }
+  .checkout-progress {
+    margin-bottom: 18px;
+  }
+  .checkout-experience .back-link {
+    min-height: var(--tap);
+    display: inline-flex;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+
+  /* ---------- Customiser ---------- */
+  .customizer .size-options {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .customizer .option-tile {
+    font-size: 13px;
+    line-height: 1.35;
+    padding: 10px 8px;
+  }
+  .customizer .quantity-control button {
+    min-width: var(--tap);
+    min-height: var(--tap);
+  }
+}
+
+/* Two-column checkout fields only when each field is wide enough (≥400px). */
+@media (min-width: 360px) and (max-width: 399px) {
+  .checkout-experience .form-grid.form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .customizer-photo {
+    min-height: 150px;
+    max-height: 150px;
+  }
+}

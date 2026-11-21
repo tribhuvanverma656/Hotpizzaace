@@ -14,7 +14,6 @@ export default function RefundCancellationPage() {
       title="Refunds & cancellations"
       intro="Clear information about demo orders, payment retries and where to ask about a real purchase."
       currentPath="/refund-cancellation"
-      updated="17 October 2026"
       sections={[
         {
           id: 'before-checkout',
@@ -22,32 +21,38 @@ export default function RefundCancellationPage() {
           content: (
             <p>
               You can change quantities, remove items and review the total in your cart before
-              submitting checkout. Review size, crust, toppings and notes carefully. Nothing is sent
-              to a restaurant while you use this prototype.
+              submitting checkout. Review size, crust, toppings and notes carefully. Cart edits are
+              drafts; submitting an enabled connected test checkout sends order and contact details
+              to the server, where authorized staff can view them. Live ordering is currently
+              paused.
             </p>
           ),
         },
         {
           id: 'demo-cancellation',
-          title: 'After a demo order is created',
+          title: 'After a test order is created',
           content: (
             <p>
-              The current customer interface does not provide a self-service cancellation button.
-              Demo staff controls can mark an eligible local order cancelled or rejected. These
-              changes affect the browser-local order record only. They do not cancel an order placed
+              Unpaid online orders awaiting confirmation can be cancelled from the order tracking
+              page in the original ordering browser or account. For paid orders or orders already
+              accepted by the restaurant, contact the restaurant for assistance. Local demo
+              cancellations update only the browser-local record. This does not cancel orders placed
               by telephone, in person or through another platform.
             </p>
           ),
         },
         {
           id: 'demo-payments',
-          title: 'Simulated payments and retries',
+          title: 'Test payments and retries',
           content: (
             <p>
-              Payment success, pending and failure screens are simulations. No money is charged, so
-              there is no real refund to process. An unpaid demo order may offer a simulated retry;
-              cancelled or rejected orders cannot be retried. Check the payment and order status in{' '}
-              <Link href="/track-order">Track order</Link> before starting again.
+              The separate development website may offer a payment simulator or Razorpay test
+              checkout. These test payments do not charge real money, so there is no real refund to
+              process. Closing a payment screen does not establish a successful or failed payment.
+              Check the server-confirmed status before retrying; retries stay attached to the same
+              restaurant order. Cancelled or rejected orders cannot be paid again. Check the payment
+              and order status in <Link href="/track-order">Track order</Link> before starting
+              again.
             </p>
           ),
         },

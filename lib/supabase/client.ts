@@ -1,14 +1,10 @@
-import { createClient } from '@supabase/supabase-js';
+'use client';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+import { createBrowserClient } from '@supabase/ssr';
+import { getSupabasePublicConfig, supabaseAuthOptions } from './config';
 
-export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey);
-
-/**
- * Returns a Supabase client if configured, otherwise returns null.
- * This guarantees the application builds and runs even before environment variables are set.
- */
-export const supabase = isSupabaseConfigured
-  ? createClient(supabaseUrl as string, supabaseAnonKey as string)
-  : null;
+/** For future authenticated browser repositories; contains no privileged credentials. */
+export function createSupabaseBrowserClient() {
+  const { url, publishableKey } = getSupabasePublicConfig();
+  return createBrowserClient(url, publishableKey, { auth: supabaseAuthOptions });
+}

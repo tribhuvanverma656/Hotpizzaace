@@ -45,8 +45,11 @@ export default function AboutPage() {
             <p>
               This website currently demonstrates the ordering experience using the restaurant’s
               supplied menu and branding. Menu photos are from the restaurant’s online listing, with
-              placeholders where a suitable image is unavailable. Checkout, payments and tracking
-              are local demos; they do not send a real order to the restaurant. See our{' '}
+              placeholders where a suitable image is unavailable. The connected website uses
+              Supabase for accounts, saved addresses and submitted order records, and is hosted on
+              Render. Live ordering is paused while development continues; online payments remain
+              simulated and test confirmations do not schedule food preparation or delivery. A
+              separate local demo keeps its test orders in the browser. See our{' '}
               <Link href="/faq">FAQs</Link> for details.
             </p>
           ),

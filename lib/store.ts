@@ -16,6 +16,7 @@ import {
 } from './customer-addresses';
 import { STORE_VERSION, migrateDemoState } from './persistence';
 import { DEFAULT_BRANCH_ID, getOrderBranchId } from './branches';
+import { sameRestaurantSettings, type SettingsSaveSnapshot } from './restaurant-settings';
 import type {
   CartItem,
   CartSelection,
@@ -86,7 +87,12 @@ export type DemoState = {
   archiveCategory: (id: string) => void;
   deleteCategory: (id: string) => void;
   reorderCategory: (id: string, direction: 'up' | 'down') => void;
-  updateSettings: (settings: RestaurantSettings) => void;
+  updateSettings: (settings: RestaurantSettings, expected?: SettingsSaveSnapshot) => void;
+  setPaymentMethodEnabled: (
+    method: RestaurantSettings['paymentMethods'][number],
+    enabled: boolean,
+    branchId: string,
+  ) => void;
   saveBranch: (branch: Branch) => void;
   selectBranch: (id: string, clearCart?: boolean) => void;
   selectAdminBranch: (id: string) => void;
@@ -105,6 +111,28 @@ export type DemoState = {
 const STORAGE_KEY = 'hot-pizza-ace-demo-v1';
 let isRehydrating = false;
 let allowMigrationWrite = false;
+let lastObservedStorageRaw: string | null | undefined;
+
+/** Read another tab's completed save before checkout or a settings write, without losing
+ * newer in-memory changes when this tab's own storage writes have failed. */
+function refreshSavedState(): void {
+  if (typeof window === 'undefined') return;
+  let raw: string | null;
+  try {
+    raw = window.localStorage.getItem(STORAGE_KEY);
+  } catch {
+    reportPersistenceError();
+    return;
+  }
+  if (raw === null || raw === lastObservedStorageRaw) return;
+  if (useDemoStore.getState().persistenceError)
+    throw new Error(
+      'Another tab saved changes while this preview could not save. Reload and review the latest settings before continuing.',
+    );
+  // This store uses synchronous localStorage, JSON parsing, migration and merge.
+  // Rehydration therefore finishes before the caller reads getState().
+  void useDemoStore.persist.rehydrate();
+}
 
 function reportPersistenceError(): void {
   const message =
@@ -228,6 +256,7 @@ export const useDemoStore = create<DemoState>()(
       },
       clearCoupon: () => set({ coupon: '' }),
       createOrder: (input) => {
+        refreshSavedState();
         const state = get();
         const branch = state.branches.find((branch) => branch.id === state.selectedBranchId);
         if (
@@ -278,6 +307,9 @@ export const useDemoStore = create<DemoState>()(
               notes: item.notes,
               quantity: item.quantity,
               unitPrice: getUnitPrice(product, item),
+              ...(product.gstInclusive
+                ? { gstInclusive: structuredClone(product.gstInclusive) }
+                : {}),
             };
           }),
           ...totals,
@@ -431,11 +463,20 @@ export const useDemoStore = create<DemoState>()(
           })),
         }));
       },
-      updateSettings: (input) => {
+      updateSettings: (input, expected) => {
+        refreshSavedState();
         const settings = parseOrThrow(settingsSchema, input);
         const state = get();
         const branch = state.branches.find((branch) => branch.id === state.adminBranchId);
         if (!branch) throw new Error('Choose a branch before saving settings.');
+        if (
+          expected &&
+          (expected.branchId !== branch.id ||
+            !sameRestaurantSettings(expected.settings, branch.settings))
+        )
+          throw new Error(
+            'Restaurant settings changed in another tab. Load the latest settings before saving your changes.',
+          );
         const branches = state.branches.map((branch) =>
           branch.id === state.adminBranchId
             ? { ...branch, settings: structuredClone(settings) }
@@ -450,6 +491,25 @@ export const useDemoStore = create<DemoState>()(
           settings: structuredClone(settings),
           coupon: validCouponAfterChange(state.cart, { ...state, settings }),
         });
+      },
+      setPaymentMethodEnabled: (method, enabled, branchId) => {
+        refreshSavedState();
+        const state = get();
+        const branch = state.branches.find((item) => item.id === state.adminBranchId);
+        if (!branch || branch.id !== branchId)
+          throw new Error('The managed branch changed. Review its payment settings first.');
+        const methods = branch.settings.paymentMethods;
+        const paymentMethods = enabled
+          ? methods.includes(method)
+            ? methods
+            : [...methods, method]
+          : methods.filter((item) => item !== method);
+        if (branch.settings.acceptingOrders && !paymentMethods.length)
+          throw new Error('Keep at least one payment method enabled.');
+        state.updateSettings(
+          { ...branch.settings, paymentMethods },
+          { branchId, settings: branch.settings },
+        );
       },
       saveBranch: (input) => {
         const branch = parseOrThrow(branchSchema, input);
@@ -603,7 +663,9 @@ export const useDemoStore = create<DemoState>()(
         getItem: (name) => {
           if (typeof window === 'undefined') return null;
           try {
-            return window.localStorage.getItem(name);
+            const value = window.localStorage.getItem(name);
+            lastObservedStorageRaw = value;
+            return value;
           } catch {
             reportPersistenceError();
             return null;
@@ -614,6 +676,7 @@ export const useDemoStore = create<DemoState>()(
           allowMigrationWrite = false;
           try {
             window.localStorage.setItem(name, value);
+            lastObservedStorageRaw = value;
           } catch {
             reportPersistenceError();
           }
@@ -622,6 +685,7 @@ export const useDemoStore = create<DemoState>()(
           if (typeof window === 'undefined') return;
           try {
             window.localStorage.removeItem(name);
+            lastObservedStorageRaw = null;
           } catch {
             reportPersistenceError();
           }

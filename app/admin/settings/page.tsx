@@ -3,9 +3,13 @@ import { useState } from 'react';
 import { Save, Store, Truck, Gift, CreditCard, Clock, CircleCheck } from 'lucide-react';
 import { toast } from 'sonner';
 import { useDemoStore } from '@/lib/store';
+import { useAdminStore } from '@/components/admin/use-admin-store';
 import { money } from '@/lib/utils';
 import type { RestaurantSettings } from '@/types';
 import { PageHeading } from '@/components/admin/shared';
+import { OwnerPasswordSettings } from '@/components/admin/owner-password-settings';
+import { KitchenStaffSettings } from '@/components/admin/kitchen-staff';
+import { sameRestaurantSettings } from '@/lib/restaurant-settings';
 import styles from './kitchen-settings.module.css';
 
 function getKitchenStatus(
@@ -54,17 +58,70 @@ function getKitchenStatus(
 }
 
 export default function SettingsPage() {
-  const { settings: customerSettings, branches, adminBranchId, updateSettings } = useDemoStore();
+  const {
+    settings: customerSettings,
+    branches,
+    adminBranchId,
+    updateSettings,
+    setPaymentMethodEnabled,
+    shared,
+    saving,
+  } = useAdminStore();
   const settings =
     branches.find((branch) => branch.id === adminBranchId)?.settings ?? customerSettings;
   const [draft, setDraft] = useState<RestaurantSettings>({ ...settings });
+  const [original, setOriginal] = useState<RestaurantSettings>(structuredClone(settings));
   const [postalCodes, setPostalCodes] = useState(settings.servicePostalCodes.join(', '));
   const [error, setError] = useState('');
   const [saved, setSaved] = useState(false);
+  const [paymentError, setPaymentError] = useState('');
+  const settingsChangedElsewhere = !sameRestaurantSettings(original, settings);
+  const cashEnabled = settings.paymentMethods.includes('cash');
+  const loadLatest = () => {
+    setDraft(structuredClone(settings));
+    setOriginal(structuredClone(settings));
+    setPostalCodes(settings.servicePostalCodes.join(', '));
+    setError('');
+    setSaved(false);
+  };
+  const changePaymentMethod = async (
+    method: RestaurantSettings['paymentMethods'][number],
+    enabled: boolean,
+  ) => {
+    setPaymentError('');
+    try {
+      await setPaymentMethodEnabled(method, enabled, adminBranchId);
+      const latest = useDemoStore
+        .getState()
+        .branches.find((branch) => branch.id === adminBranchId)!;
+      setDraft((previous) => ({
+        ...previous,
+        paymentMethods: [...latest.settings.paymentMethods],
+      }));
+      setOriginal((previous) => ({
+        ...previous,
+        paymentMethods: [...latest.settings.paymentMethods],
+      }));
+      setSaved(false);
+      toast.success(
+        method === 'cash'
+          ? `Cash on delivery ${enabled ? 'enabled' : 'disabled'}`
+          : 'Payment options saved',
+      );
+    } catch (err) {
+      setPaymentError(err instanceof Error ? err.message : 'Could not save payment options.');
+    }
+  };
   const savedKitchenStatus = getKitchenStatus(settings);
   const draftKitchenStatus = getKitchenStatus(draft);
   const kitchenChanged = (
-    ['acceptingOrders', 'temporarilyClosed', 'deliveryEnabled', 'pickupEnabled'] as const
+    [
+      'acceptingOrders',
+      'counterAcceptingOrders',
+      'temporarilyClosed',
+      'deliveryEnabled',
+      'pickupEnabled',
+    ] as const
   ).some((key) => settings[key] !== draft[key]);
   const set = <K extends keyof RestaurantSettings>(key: K, value: RestaurantSettings[K]) => {
     setDraft((prev) => ({ ...prev, [key]: value }));
@@ -93,7 +150,11 @@ export default function SettingsPage() {
     description: string,
   ) => (
     <label className="admin-checkbox">
-      <input type="checkbox" checked={draft[key]} onChange={(e) => set(key, e.target.checked)} />
+      <input
+        type="checkbox"
+        checked={Boolean(draft[key])}
+        onChange={(e) => set(key, e.target.checked)}
+      />
       <span>
         {label}
         <small>{description}</small>
@@ -101,7 +162,7 @@ export default function SettingsPage() {
     </label>
   );
   const kitchenSwitch = (
-    key: 'acceptingOrders' | 'temporarilyClosed',
+    key: 'acceptingOrders' | 'counterAcceptingOrders' | 'temporarilyClosed',
     label: string,
     description: string,
   ) => (
@@ -113,7 +174,7 @@ export default function SettingsPage() {
         role="switch"
         aria-label={label}
         aria-describedby={`${key}-description`}
-        checked={draft[key]}
+        checked={Boolean(draft[key])}
         onChange={(e) => set(key, e.target.checked)}
       />
       <span className={styles.switchTrack} aria-hidden="true" />
@@ -133,11 +194,30 @@ export default function SettingsPage() {
         title="Restaurant settings"
         description="Set up your restaurant, your service area, and your next great offer."
       />
+      {shared.enabled && <OwnerPasswordSettings />}
+      {shared.enabled && <KitchenStaffSettings key={shared.user?.id ?? 'owner'} />}
+      {settingsChangedElsewhere && (
+        <div className={styles.conflict} role="alert">
+          <strong>Saved settings changed</strong>
+          <p>
+            Another administrator updated this branch. Load the latest settings before saving this
+            form; your unsaved edits have been kept. Payment switches below always show the saved
+            value.
+          </p>
+          <button className="btn btn-outline btn-sm" type="button" onClick={loadLatest}>
+            Load latest settings
+          </button>
+        </div>
+      )}
       <form
         className="admin-form"
-        onSubmit={(e) => {
+        onSubmit={async (e) => {
           e.preventDefault();
           setError('');
+          if (settingsChangedElsewhere) {
+            setError('Load the latest settings before saving this form.');
+            return;
+          }
           const codes = postalCodes
             .split(/[\s,]+/)
             .map((s) => s.trim())
@@ -172,8 +252,8 @@ export default function SettingsPage() {
             setError('Enable delivery or pickup before accepting orders.');
             return;
           }
-          if (!draft.paymentMethods.length) {
-            setError('Choose at least one payment method.');
+          if (draft.acceptingOrders && !draft.paymentMethods.length) {
+            setError('Choose at least one website payment method before accepting website orders.');
             return;
           }
           if (draft.couponCode && !/^[A-Z0-9]{3,20}$/.test(draft.couponCode)) {
@@ -197,12 +277,21 @@ export default function SettingsPage() {
             return;
           }
           try {
-            updateSettings({
-              ...draft,
-              name: draft.name.trim(),
-              address: draft.address.trim(),
-              servicePostalCodes: [...new Set(codes)],
-            });
+            await updateSettings(
+              {
+                ...draft,
+                name: draft.name.trim(),
+                address: draft.address.trim(),
+                servicePostalCodes: [...new Set(codes)],
+              },
+              { branchId: adminBranchId, settings: original },
+            );
+            const latest = useDemoStore
+              .getState()
+              .branches.find((branch) => branch.id === adminBranchId)!;
+            setDraft(structuredClone(latest.settings));
+            setOriginal(structuredClone(latest.settings));
+            setPostalCodes(latest.settings.servicePostalCodes.join(', '));
             toast.success('Restaurant settings saved');
             setSaved(true);
           } catch (err) {
@@ -284,7 +373,8 @@ export default function SettingsPage() {
                     placeholder="208027"
                   />
                   <small>
-                    Separate six-digit Indian postal codes with commas. Demo coverage only.
+                    Separate six-digit Indian postal codes with commas. Delivery coverage for this
+                    branch.
                   </small>
                 </label>
                 <div className="form-grid">
@@ -374,12 +464,17 @@ export default function SettingsPage() {
                 {kitchenSwitch(
                   'acceptingOrders',
                   'Accepting orders',
-                  'On allows new orders. Off pauses new orders.',
+                  'Controls delivery and pickup orders from the customer website.',
+                )}
+                {kitchenSwitch(
+                  'counterAcceptingOrders',
+                  'Accept counter and QR orders',
+                  'Allows staff counter orders and pay-at-counter QR requests for this branch. Save to apply.',
                 )}
                 {kitchenSwitch(
                   'temporarilyClosed',
                   'Temporarily closed',
-                  'On closes checkout and overrides Accepting orders.',
+                  'Pauses both website checkout and new counter / branch QR orders.',
                 )}
                 {kitchenChanged && (
                   <div className={styles.preview} role="status">
@@ -392,7 +487,11 @@ export default function SettingsPage() {
                   Switch changes take effect after you save settings. Opening hours are displayed
                   for customers; they do not automatically open or close checkout.
                 </p>
-                <button className="btn btn-primary" type="submit">
+                <button
+                  className="btn btn-primary"
+                  type="submit"
+                  disabled={saving || settingsChangedElsewhere}
+                >
                   <Save size={17} /> Save settings
                 </button>
                 <p className="admin-inline-note">
@@ -408,40 +507,60 @@ export default function SettingsPage() {
                 </h2>
               </div>
               <div className="admin-card-padding admin-form">
+                <div
+                  className={`${styles.status} ${cashEnabled ? styles.open : styles.closed}`}
+                  aria-live="polite"
+                >
+                  <span>Current saved COD status</span>
+                  <strong>
+                    {cashEnabled ? 'Cash on delivery enabled' : 'Cash on delivery disabled'}
+                  </strong>
+                  <p>
+                    {cashEnabled
+                      ? 'Cash is available for new delivery and pickup orders.'
+                      : 'New delivery and pickup orders must use another enabled payment method.'}
+                  </p>
+                </div>
                 {(
                   [
-                    { id: 'upi', name: 'UPI (simulated)' },
-                    { id: 'card', name: 'Debit / credit card (simulated)' },
+                    { id: 'upi', name: 'UPI' },
+                    { id: 'card', name: 'Debit / credit card' },
                     { id: 'cash', name: 'Enable Cash on Delivery (COD)' },
                   ] as const
                 ).map((method) => (
                   <label key={method.id} className="admin-checkbox">
                     <input
                       type="checkbox"
-                      checked={draft.paymentMethods.includes(method.id)}
-                      onChange={(e) =>
-                        set(
-                          'paymentMethods',
-                          e.target.checked
-                            ? [...draft.paymentMethods, method.id]
-                            : draft.paymentMethods.filter((m) => m !== method.id),
-                        )
-                      }
+                      checked={settings.paymentMethods.includes(method.id)}
+                      disabled={saving}
+                      onChange={(e) => changePaymentMethod(method.id, e.target.checked)}
                     />
                     <span>
                       {method.name}
                       {method.id === 'cash' && (
                         <small>
                           Turn off to remove cash from delivery and pickup checkout. Existing orders
-                          stay unchanged. Save settings to apply.
+                          stay unchanged. Saved immediately when changed.
                         </small>
                       )}
                     </span>
                   </label>
                 ))}
                 <p className="admin-inline-note">
-                  UPI and card payments use explicit demo states. No credentials or actual money
-                  transfers are involved.
+                  Payment switches save immediately for this branch. Other form changes use Save
+                  settings.{' '}
+                  {shared.enabled
+                    ? 'Changes apply to new orders on every connected device.'
+                    : 'Use Visit storefront to test the same browser preview.'}
+                </p>
+                {paymentError && (
+                  <p className="error-message" role="alert">
+                    {paymentError}
+                  </p>
+                )}
+                <p className="admin-inline-note">
+                  These options control website checkout. Online payments require an available
+                  payment gateway. Counter payments are recorded separately by restaurant staff.
                 </p>
               </div>
             </section>
@@ -497,23 +616,25 @@ export default function SettingsPage() {
         <div className="admin-form-footer">
           {saved && (
             <span className="admin-saved">
-              <CircleCheck size={17} /> All changes saved locally
+              <CircleCheck size={17} /> All changes saved{' '}
+              {shared.enabled ? 'to Supabase' : 'locally'}
             </span>
           )}
           <button
             type="button"
             className="btn btn-outline"
             onClick={() => {
-              setDraft({ ...settings });
-              setPostalCodes(settings.servicePostalCodes.join(', '));
-              setError('');
-              setSaved(false);
+              loadLatest();
               toast.info('Unsaved changes discarded');
             }}
           >
             Discard changes
           </button>
-          <button className="btn btn-primary" type="submit">
+          <button
+            className="btn btn-primary"
+            type="submit"
+            disabled={saving || settingsChangedElsewhere}
+          >
             <Save size={17} /> Save settings
           </button>
         </div>

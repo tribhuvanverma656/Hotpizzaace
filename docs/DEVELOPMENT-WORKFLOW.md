@@ -1,47 +1,76 @@
 # GitHub and release workflow
 
-Recorded 18 October 2026. The owner supplied [Satya2n/hotpizzaace](https://github.com/Satya2n/hotpizzaace); local Git is initialized and connected to its existing history. `.github/workflows/ci.yml` and `.nvmrc` configure the quality pipeline described below. The original README commit is preserved. Supabase, Hostinger and automated deployment remain Phase 2 work. Check the repository's [Actions page](https://github.com/Satya2n/hotpizzaace/actions) for the result of each uploaded commit.
+Use two long-lived branches in [Satya2n/hotpizzaace](https://github.com/Satya2n/hotpizzaace):
 
-## Ownership and setup needed now
+| Branch    | Purpose                        | Render service                                                          |
+| --------- | ------------------------------ | ----------------------------------------------------------------------- |
+| `staging` | Active development and testing | [hotpizzaace-development](https://hotpizzaace-development.onrender.com) |
+| `main`    | Owner-approved release source  | [hotpizzaace.com](https://hotpizzaace.com), service `hotpizzaace`       |
 
-1. The repository owner is `Satya2n`; repository visibility and collaborator permissions should be reviewed in GitHub before adding other contributors. Use a private repository for business code where appropriate.
-2. `.gitignore` excludes dependencies, build output, local environment secrets, logs and test output. Never commit customer-data exports, production secrets or credentials. Public demo credentials are examples and must be replaced before live use.
-3. The prototype baseline includes the lockfile and QA notes. CI checks every pull request, pushes to `main`/`staging`, and manual runs from Actions. The job/check name is **Quality checks**.
-4. Node **24.20.0** is pinned in `.nvmrc` and used by CI. Use `nvm use` when nvm is installed. Verify the supported runtime on Hostinger during Phase 2.
-5. Agree a branch protection plan. GitHub Free offers private repositories and an Actions allowance, but enforced required checks and review rules on private repositories require personal Pro or business Team (or above). On Free, reviews/checks are a working convention rather than an enforced merge barrier.
+The workflow is **local change → push to staging → CI → development preview → owner testing → release PR to main**. Updating `staging` does not promote a release to `main`.
 
-## Suggested release path
+## Environment status — 3 November 2026
 
-`feature/* → pull request into staging → automated checks → staging app → ordering/admin QA → pull request into main → checks/review → production app → release tag`
+Production runs owner-approved [PR #18](https://github.com/Satya2n/hotpizzaace/pull/18),
+merge `1973014eb741b4e575e8af9e1f4a0d861296dc8e`, retaining PR #19's product-saving
+feedback. Render deployment `dep-dbkmipks728c738ru1g0` finished live at 04:59:50 UTC.
+Both `main` and `staging` are aligned at that merge at this snapshot; main
+[CI #123](https://github.com/Satya2n/hotpizzaace/actions/runs/41580946182) and staging
+[CI #124](https://github.com/Satya2n/hotpizzaace/actions/runs/41581623545) passed.
+The new nearest-rupee rounding request is separate development work and is not
+included in this production release.
 
-- `feature/*` or `fix/*`: one focused change, with a meaningful commit and PR description.
-- `staging`: the combined candidate release. During Phase 2 connect a separate Hostinger app and development Supabase project with test payments. The staging app should have restricted access where supported and must not receive live customer/payment data.
-- `main`: the production source. Merge the tested release through a PR. Configure required checks and prevent direct/force pushes when the selected GitHub plan supports enforcement. If at least two maintainers are available, require an independent PR review; a solo owner can still review the diff and merge after successful checks, without claiming an independent approval.
-- After production smoke checks pass, tag the deployed commit, for example `v1.0.0` for the first accepted live launch, `v1.0.1` for a fix or `v1.1.0` for a compatible feature. Record the commit, date, changes and any migration in release notes. These version examples refer to future live releases. The `phase-1-baseline` tag identifies the initial prototype and CI setup; it does not imply a public deployment.
+The production chef schema and dedicated backend are deployed and its feature flag
+is enabled. The separate chef login and owner staff-management UI render, but no
+production chef account has been created yet. Barra counter/branch QR ordering
+uses cash or direct merchant UPI; website checkout, COD and live online payments
+remain paused. Owner password-save investigation remains deferred.
 
-GitHub Actions should install exactly the lockfile dependencies with `npm ci`, run lint and the domain/store tests, run the production build, and run TypeScript checking against the generated build types. Add browser journeys when the hosted staging flow exists. Keep the jobs free of production credentials. Avoid deploying unreviewed pull-request code with privileged secrets.
+| Environment | Application / source                                                               | Separate Supabase project                         |
+| ----------- | ---------------------------------------------------------------------------------- | ------------------------------------------------- |
+| Development | [hotpizzaace-development](https://hotpizzaace-development.onrender.com), `staging` | `hotpizzaaceDB` (`kaypgsstngguvrpftpwo`)          |
+| Production  | [hotpizzaace.com](https://hotpizzaace.com), `main`, Render service `hotpizzaace`   | `hotpizzaace-production` (`vzehsdwwaybcxvzodqaq`) |
 
-The configured workflow uses read-only repository permissions, pins checkout/setup-node to verified release commit SHAs, and cancels stale runs on the same PR/branch. It contains no deploy step or production secrets. `npm ci` runs in a fresh runner; builds must precede the explicit type check so Next.js route types are generated. See the CI job's logs for individual results.
+Each environment keeps its own credentials, customers, orders and settings.
+Source promotion does not copy development data into production. See
+[project status](PROJECT-STATUS.md) for current acceptance and payment configuration,
+[Kitchen staff access](KITCHEN-STAFF-ACCESS.md) for the released feature and its
+remaining private acceptance, and
+[payment readiness](RAZORPAY-PAYMENTS.md) for the postponed private Razorpay handoff.
 
-For an ordinary change, create a branch such as `feature/menu-improvement`, commit the change, push that branch, and open a PR targeting `staging`. Merge the tested release from `staging` to `main` through another PR. If working solo, review the diff and successful checks before merging. Do not use force pushes to update shared release branches.
+## Everyday changes
 
-## Hostinger connection in Phase 2
+1. Start on `staging` and get the latest code: `git switch staging`, then `git pull --ff-only`.
+2. Make the change locally, inspect the diff and run the relevant checks. Use the Node version in `.nvmrc` and the committed lockfile.
+3. Commit the change and run `git push origin staging`.
+4. Wait for GitHub Actions **Quality checks** and the Render development deployment to pass. Check the deployed commit before testing the preview.
+5. Test the changed customer/admin flow on the development preview, including mobile behavior when relevant. Fix problems on `staging` and repeat.
 
-Managed Node deployment supports selecting a GitHub branch and redeploying on pushes to it. Use separate app slots for staging and production, with separate variables, callback URLs and payment/webhook secrets. Confirm slots and resource limits on the chosen plan.
+Routine solo work does not need a new branch or a development PR. For a larger change or parallel work, a temporary `feature/*` or `fix/*` branch is optional: open a PR into `staging`, merge after checks, then delete that temporary branch. Keep only `staging` and `main` as permanent branches.
 
-Do not assume Hostinger waits for GitHub Actions. Checks and approval must happen before the production branch changes; make the deployment build run the relevant checks too so a failing check stops that build. A native managed-Node auto-deployment toggle or a wait-for-CI integration has not been verified. Manual Redeploy fetches the latest connected branch, so it must not be described as selecting any historical artifact.
+## Release when ready
 
-## Recovery and database changes
+1. Open a PR from `staging` to `main`, describing the customer-visible changes and verification.
+2. Review the diff, successful checks and owner testing before merging. A solo owner can perform this review; it is not an independent approval.
+3. When the owner approves, use GitHub's **Create a merge commit** option for `staging` → `main`; do not squash or rebase releases between these permanent branches. Verify the public Render deployment and its deployed commit, then check the changed flow there.
+4. Tag an accepted release, such as `v1.0.0`, and record its commit and changes in GitHub release notes. A Git tag alone does not deploy a website.
+5. After the release succeeds, fast-forward `staging` to the updated `main` so both histories stay aligned:
 
-For a faulty code release, open a revert PR, run checks and redeploy the corrected branch. Keep a record of the last healthy release commit and test the recovery process on staging. Code versions in Git do not back up the database. Supabase migrations, backup/restore and deployment compatibility must be planned separately; avoid destructive schema changes that break the previous code release.
+```sh
+git fetch origin
+git switch staging
+git merge --ff-only origin/main
+git push origin staging
+```
 
-Admin edits to menu/prices, live orders and addresses are application data, not Git commits. Phase 2 needs database backups and an audit trail for sensitive admin changes. In the current prototype these edits live only in browser storage, and pushing the code to GitHub will not transfer them.
+If fast-forwarding fails, review the diverging commits before continuing; do not force-push.
 
-## References verified for this plan
+The latest approved release on `main` is the production baseline. Later changes on `staging` require their own accepted release PR; domain configuration and Git tags do not promote those changes.
 
-- [GitHub Node.js CI](https://docs.github.com/en/actions/tutorials/build-and-test-code/nodejs)
-- [GitHub Actions billing and included usage](https://docs.github.com/en/billing/concepts/product-billing/github-actions)
-- [Private-repository branch protection availability](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches)
-- [Hostinger GitHub branch selection](https://www.hostinger.com/support/how-to-migrate-a-node-js-application-to-hostinger/)
-- [Hostinger deployment on push](https://www.hostinger.com/support/how-to-deploy-apps-built-with-codex-on-hostinger/)
-- [Hostinger manual redeploy](https://www.hostinger.com/support/how-to-redeploy-a-node-js-application/)
+## Checks, data and recovery
+
+GitHub Actions runs lint, regression tests, the production build and TypeScript checking for pushes to `staging`/`main`, every PR and manual runs. The workflow itself has no deployment step; Render handles deployment from its connected branch. See [Actions](https://github.com/Satya2n/hotpizzaace/actions) for each commit's results and [Render configuration](RENDER-SUPABASE.md) for the development service settings.
+
+Keep secrets in ignored local environment files or hosting settings. Do not force-push shared branches. For a faulty release, prepare a revert on `staging`, test it, and release the correction through a PR to `main`.
+
+Git versions source code, not application data. Connected menu edits, orders and saved addresses live in each environment's separate Supabase database; local carts/drafts and the separately labelled browser demo remain browser data. Promoting or reverting source does not copy, restore or delete database records. Review migrations, schema compatibility, backups and database recovery separately from an application rollback.

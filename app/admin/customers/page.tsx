@@ -3,12 +3,12 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { Search, Users, ArrowUpRight } from 'lucide-react';
 import { getOrderBranchId } from '@/lib/branches';
-import { useDemoStore } from '@/lib/store';
+import { useAdminStore } from '@/components/admin/use-admin-store';
 import { money } from '@/lib/utils';
 import { dateTime, isRevenueEligible, PageHeading } from '@/components/admin/shared';
 import type { Order } from '@/types';
 export default function CustomersPage() {
-  const { orders: allOrders, adminBranchId } = useDemoStore();
+  const { orders: allOrders, adminBranchId, shared } = useAdminStore();
   const orders = allOrders.filter((order) => getOrderBranchId(order) === adminBranchId);
   const [search, setSearch] = useState('');
   const groups = Object.values(
@@ -40,8 +40,9 @@ export default function CustomersPage() {
       <div className="admin-inline-note admin-customers-note">
         <Users size={19} />
         <span>
-          Demonstration directory, grouped by phone number from local sample orders. This is not an
-          authenticated customer account system.
+          {shared.enabled
+            ? 'Customer contact details from shared orders, grouped by phone number. A phone number is contact information and does not establish account ownership.'
+            : 'Demonstration directory, grouped by phone number from local sample orders. This is not an authenticated customer account system.'}
         </span>
       </div>
       <section className="admin-card">
@@ -96,7 +97,7 @@ export default function CustomersPage() {
                           .reduce((sum, o) => sum + o.total, 0),
                       )}
                     </strong>
-                    <small>Fulfilled + simulated-paid only</small>
+                    <small>Fulfilled + verified live payment only</small>
                   </td>
                   <td>
                     <Link
@@ -124,7 +125,11 @@ export default function CustomersPage() {
             <div className="empty-state">
               <Users size={30} />
               <h3>No customers found</h3>
-              <p>Customers appear here when orders are placed in the demo.</p>
+              <p>
+                {shared.enabled
+                  ? 'Customer contacts appear here when orders are placed on the connected storefront.'
+                  : 'Customers appear here when orders are placed in the demo.'}
+              </p>
             </div>
           )}
         </div>

@@ -4,6 +4,7 @@ import { useEffect, useId, useRef, useState } from 'react';
 import { Check, ChevronDown, Clock, MapPin, Phone, ShoppingBag, Truck } from 'lucide-react';
 import { toast } from 'sonner';
 import { useDemoStore } from '@/lib/store';
+import { useSharedCommerce } from './shared-commerce-provider';
 import type { Branch } from '@/types';
 import {
   Dialog,
@@ -23,6 +24,7 @@ function acceptsOrders(branch: Branch) {
 }
 
 export function BranchPicker({ className = '' }: { className?: string }) {
+  const shared = useSharedCommerce();
   const { branches, selectedBranchId, cart, selectBranch } = useDemoStore();
   const [open, setOpen] = useState(false);
   const [pin, setPin] = useState('');
@@ -81,6 +83,7 @@ export function BranchPicker({ className = '' }: { className?: string }) {
         <button
           type="button"
           className={`branch-picker-trigger ${className}`}
+          disabled={shared.enabled && !shared.ready}
           aria-label={`Choose branch${selectedBranch ? `. Current branch: ${selectedBranch.name}` : ''}`}
         >
           <MapPin size={18} aria-hidden="true" />

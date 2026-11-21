@@ -7,10 +7,14 @@ import { useDemoStore } from '@/lib/store';
 import { getOrdersForCustomer } from '@/lib/order-tracking';
 import { OrderDetail } from '@/components/order-detail';
 import { LocalOrderList } from '@/components/local-order-list';
+import { useSharedCommerce } from '@/components/shared-commerce-provider';
+import { SharedOrderView } from '@/components/shared-order-view';
+import { SharedOrderHistory } from '@/components/shared-order-history';
 
 function TrackingContent() {
   const { orders, customerSession, hydrated } = useDemoStore();
   const params = useSearchParams();
+  const shared = useSharedCommerce();
   const router = useRouter();
   const [number, setNumber] = useState('');
   const [phone, setPhone] = useState('');
@@ -22,6 +26,12 @@ function TrackingContent() {
   const order =
     localOrders.find((order) => order.id === requestedId) ||
     orders.find((order) => order.id === foundId);
+  if (shared.enabled)
+    return requestedId ? (
+      <SharedOrderView id={requestedId} access={params.get('access') ?? undefined} />
+    ) : (
+      <SharedOrderHistory />
+    );
   if (!hydrated)
     return (
       <div className="container empty-state" role="status">

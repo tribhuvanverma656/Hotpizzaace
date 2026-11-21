@@ -1,3 +1,4 @@
+import { isGatewayMode, isLiveGatewayMode, isTestGatewayMode } from './payments/method';
 import type {
   CartItem,
   CartSelection,
@@ -8,6 +9,9 @@ import type {
   Product,
   RestaurantSettings,
 } from '../types';
+import { calculateOrderGst, validateGstInclusive } from './billing';
+import { isStaffCounterPaymentComplete } from './payments/counter';
+import { NEAREST_RUPEE_POLICY, nearestRupeeAdjustment } from './rounding';
 
 const MAX_QUANTITY = 20;
 
@@ -20,8 +24,8 @@ export function formatCurrency(paise: number): string {
 }
 
 function checkMoney(value: number, label: string): void {
-  if (!Number.isSafeInteger(value) || value < 0)
-    throw new Error(`${label} must be a non-negative amount in paise.`);
+  if (!Number.isSafeInteger(value) || value < 0 || value > 100_000_000)
+    throw new Error(`${label} must be a non-negative amount of at most ₹10,00,000 in paise.`);
 }
 
 export function getOptionPrice(option: Option, sizeId?: string): number {
@@ -34,6 +38,13 @@ export function validateSelection(product: Product, selection: CartSelection): v
     throw new Error('This menu item no longer exists.');
   if (!product.available || product.archived)
     throw new Error(`${product.name} is currently unavailable. Please remove it from your cart.`);
+  if (product.gstInclusive !== undefined) {
+    validateGstInclusive(product.gstInclusive);
+    if (product.crusts.length || product.toppings.length)
+      throw new Error(
+        'GST-inclusive items cannot have crust or topping add-ons. Use size variants for each MRP.',
+      );
+  }
   if (
     !Number.isSafeInteger(selection.quantity) ||
     selection.quantity < 1 ||
@@ -75,13 +86,14 @@ export function getUnitPrice(product: Product, selection: CartSelection): number
     product.sizes.find((option) => option.id === selection.sizeId)?.price ?? product.price;
   const crust = product.crusts.find((option) => option.id === selection.crustId);
   const crustPrice = crust ? getOptionPrice(crust, selection.sizeId) : 0;
-  return (
+  const unitPrice =
     sizePrice +
     crustPrice +
     product.toppings
       .filter((option) => selection.toppingIds.includes(option.id))
-      .reduce((sum, option) => sum + getOptionPrice(option, selection.sizeId), 0)
-  );
+      .reduce((sum, option) => sum + getOptionPrice(option, selection.sizeId), 0);
+  checkMoney(unitPrice, 'Item price');
+  return unitPrice;
 }
 
 export function getItemOptions(product: Product, selection: CartSelection): string[] {
@@ -146,16 +158,31 @@ export function getMinimumOrderShortfall(
 export function getCartTotals(
   cart: CartItem[],
   products: Product[],
-  settings: RestaurantSettings,
+  settings: Pick<
+    RestaurantSettings,
+    | 'deliveryFee'
+    | 'freeDeliveryThreshold'
+    | 'couponMaximum'
+    | 'couponMinimum'
+    | 'couponPercent'
+    | 'couponCode'
+    | 'billing'
+  >,
   coupon = '',
   fulfillment: Fulfillment = 'delivery',
 ) {
-  const subtotal = cart.reduce((sum, item) => {
+  const pricedItems = cart.map((item) => {
     const product = products.find((candidate) => candidate.id === item.productId);
     if (!product)
       throw new Error('An item in your cart is no longer on the menu. Please remove it.');
-    return sum + getUnitPrice(product, item) * item.quantity;
-  }, 0);
+    return {
+      unitPrice: getUnitPrice(product, item),
+      quantity: item.quantity,
+      ...(product.gstInclusive ? { gstInclusive: structuredClone(product.gstInclusive) } : {}),
+    };
+  });
+  const subtotal = pricedItems.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
+  checkMoney(subtotal, 'Item subtotal');
   checkMoney(settings.deliveryFee, 'Delivery fee');
   if (settings.freeDeliveryThreshold != null)
     checkMoney(settings.freeDeliveryThreshold, 'Free delivery threshold');
@@ -181,20 +208,130 @@ export function getCartTotals(
     );
   }
   const deliveryFee = cart.length ? getDeliveryFee(subtotal, settings, fulfillment) : 0;
-  return { subtotal, deliveryFee, discount, total: subtotal + deliveryFee - discount };
+  const taxableValue = subtotal + deliveryFee - discount;
+  checkMoney(taxableValue, 'Order amount');
+  if (!settings.billing && pricedItems.some((item) => item.gstInclusive))
+    throw new Error(
+      'Complete this branch’s GST billing profile before selling GST-inclusive items.',
+    );
+  const tax =
+    settings.billing && cart.length
+      ? calculateOrderGst(pricedItems, deliveryFee, discount, settings.billing)
+      : undefined;
+  const unroundedTotal = taxableValue + (tax?.total ?? 0) - (tax?.includedTotal ?? 0);
+  // Round new payable bills to the nearest rupee without changing item/GST paise.
+  const roundOff = cart.length
+    ? nearestRupeeAdjustment(unroundedTotal, subtotal, deliveryFee, tax)
+    : undefined;
+  const total = unroundedTotal + (roundOff ?? 0);
+  if (cart.length && total <= 0)
+    throw new Error('The bill total must be at least ₹1 after round off.');
+  return {
+    subtotal,
+    deliveryFee,
+    discount,
+    ...(tax ? { tax } : {}),
+    ...(roundOff !== undefined ? { roundOff, roundOffPolicy: NEAREST_RUPEE_POLICY } : {}),
+    total,
+  };
 }
 
-/** Completed, paid sales only. A pending cash collection is never revenue. */
-export function isRevenueEligible(order: Order): boolean {
+/** Captured online payments and development simulations have different provenance. */
+export function isOnlinePaymentComplete(
+  order: Pick<
+    Order,
+    'paymentMethod' | 'paymentStatus' | 'paymentMode' | 'paymentReviewRequired' | 'refund'
+  >,
+): boolean {
+  if (order.paymentMethod === 'cash' || order.paymentReviewRequired || hasProcessedRefund(order))
+    return false;
+  if (isGatewayMode(order.paymentMode)) return order.paymentStatus === 'paid';
+  // Older browser-local demo receipts predate the explicit simulation field.
   return (
-    (order.status === 'delivered' || order.status === 'picked_up') &&
+    (order.paymentMode === undefined || order.paymentMode === 'simulation') &&
     order.paymentStatus === 'simulated_paid'
   );
 }
 
+/** Refunds are separate from the immutable original capture and invoice. */
+export function hasProcessedRefund(order: Pick<Order, 'refund'>): boolean {
+  return (order.refund?.amount ?? 0) > 0;
+}
+
+/** Real completed sales only; test captures and pending cash collection are excluded. */
+export function isRevenueEligible(order: Order): boolean {
+  if (order.testVoid || hasProcessedRefund(order)) return false;
+  if (order.channel === 'counter')
+    return (
+      order.environment === 'production' &&
+      (order.fulfillment === 'delivery'
+        ? order.status === 'delivered'
+        : order.status === 'served' || order.status === 'closed') &&
+      isStaffCounterPaymentComplete(order)
+    );
+  return (
+    (order.status === 'delivered' ||
+      order.status === 'picked_up' ||
+      (order.fulfillment === 'dine_in' && ['served', 'closed'].includes(order.status))) &&
+    order.paymentStatus === 'paid' &&
+    isLiveGatewayMode(order.paymentMode) &&
+    order.paymentMethod !== 'cash' &&
+    !order.paymentReviewRequired
+  );
+}
+
+/** Development/demo totals are kept separate from real captured revenue. */
+export function isSimulatedRevenueEligible(order: Order): boolean {
+  if (order.testVoid || hasProcessedRefund(order)) return false;
+  if (order.channel === 'counter')
+    return (
+      order.environment === 'development' &&
+      (order.fulfillment === 'delivery'
+        ? order.status === 'delivered'
+        : order.status === 'served' || order.status === 'closed') &&
+      isStaffCounterPaymentComplete(order)
+    );
+  return (
+    (order.status === 'delivered' ||
+      order.status === 'picked_up' ||
+      (order.fulfillment === 'dine_in' && ['served', 'closed'].includes(order.status))) &&
+    !order.paymentReviewRequired &&
+    ((isTestGatewayMode(order.paymentMode) && order.paymentStatus === 'paid') ||
+      ((order.paymentMode === undefined || order.paymentMode === 'simulation') &&
+        order.paymentStatus === 'simulated_paid'))
+  );
+}
+
 export function getAllowedOrderStatuses(
-  order: Pick<Order, 'status' | 'fulfillment'>,
+  order: Pick<Order, 'status' | 'fulfillment'> &
+    Partial<
+      Pick<Order, 'paymentStatus' | 'testVoid' | 'channel' | 'paymentReviewRequired' | 'refund'>
+    >,
 ): OrderStatus[] {
+  if (order.testVoid || hasProcessedRefund(order)) return [];
+  if (
+    order.channel === 'counter' &&
+    order.fulfillment === 'delivery' &&
+    order.paymentStatus !== 'paid' &&
+    ['ready', 'out_for_delivery'].includes(order.status)
+  )
+    return [];
+  if (order.fulfillment === 'dine_in') {
+    const next: Partial<Record<OrderStatus, OrderStatus[]>> = {
+      pending: order.channel !== 'counter' ? ['confirmed', 'rejected', 'cancelled'] : [],
+      confirmed: ['preparing'],
+      preparing: ['ready'],
+      ready: ['served'],
+      served: order.paymentStatus === 'paid' ? ['closed'] : [],
+    };
+    return [
+      ...(next[order.status] ?? []),
+      ...(['confirmed', 'preparing', 'ready'].includes(order.status) &&
+      (order.paymentStatus !== 'paid' || order.channel === 'website')
+        ? ['cancelled' as const]
+        : []),
+    ];
+  }
   const common: Partial<Record<OrderStatus, OrderStatus[]>> = {
     pending: ['confirmed', 'rejected', 'cancelled'],
     confirmed: ['preparing', 'cancelled'],

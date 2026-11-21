@@ -1,0 +1,95 @@
+.account {
+  position: relative;
+}
+
+.account summary {
+  min-height: 38px;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  border-radius: 22px;
+  background: #f1eee8;
+  color: #4a463d;
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.account summary::-webkit-details-marker {
+  display: none;
+}
+
+.account[open] summary {
+  background: #e9e4da;
+}
+
+.menu {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 9px);
+  right: 0;
+  width: 220px;
+  padding: 10px;
+  border: 1px solid #e8e4dc;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 12px 30px rgb(35 31 24 / 14%);
+}
+
+.identity {
+  display: grid;
+  gap: 4px;
+  padding: 6px 7px 10px;
+}
+
+.identity strong {
+  color: #292720;
+  font-size: 12px;
+}
+
+.identity span {
+  color: #77736b;
+  font-size: 10px;
+}
+
+.identity .role {
+  width: fit-content;
+  margin-top: 3px;
+  padding: 4px 7px;
+  border-radius: 12px;
+  background: #f8ece8;
+  color: #99432e;
+  font-weight: 700;
+}
+
+.menu button {
+  width: 100%;
+  min-height: 38px;
+  padding: 0 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 0;
+  border-top: 1px solid #f0eee9;
+  background: transparent;
+  color: #8f402d;
+  font: inherit;
+  font-size: 11px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.menu button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.error {
+  margin: 0;
+  padding: 7px;
+  color: #9c3728;
+  font-size: 10px;
+  line-height: 1.4;
+}

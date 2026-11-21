@@ -10,6 +10,7 @@ import {
 } from '../lib/legacy-demo-data';
 import { MENU_REVISION } from '../lib/menu/catalog';
 import { STORE_VERSION } from '../lib/persistence';
+import { migrateDemoState } from '../lib/persistence';
 import { menuPhotos } from '../lib/menu/photos';
 import { migrateMenuState } from '../lib/menu/migrate';
 import { getUnitPrice } from '../lib/pricing';
@@ -19,8 +20,30 @@ import { useDemoStore } from '../lib/store';
 
 const find = (slug: string) => initialProducts.find((product) => product.slug === slug)!;
 
-test('printed menu contains 111 unique products in 14 categories and valid local images', () => {
-  assert.equal(initialProducts.length, 111);
+test('requested ₹10 and ₹20 water choices stay tax-inclusive and preserve existing owner edits on upgrade', () => {
+  for (const price of [10, 20]) {
+    const product = find(`water-bottle-${price}`);
+    assert.equal(product.price, price * 100);
+    assert.deepEqual(product.gstInclusive, { rateBps: 500, code: '2201' });
+    assert.equal(product.categoryId, 'beverages');
+    assert.equal(product.sizes.length, 0);
+  }
+  const edited = { ...find('water-bottle-10'), price: 900, available: false };
+  const upgraded = migrateDemoState({ products: [edited] }, 8);
+  assert.deepEqual(
+    upgraded.products?.find((product) => product.id === edited.id),
+    edited,
+  );
+  assert.equal(upgraded.products?.filter((product) => product.id === edited.id).length, 1);
+  assert.equal(
+    upgraded.products?.find((product) => product.slug === 'water-bottle-20')?.price,
+    2000,
+  );
+  assert.strictEqual(migrateDemoState(upgraded, STORE_VERSION).products, upgraded.products);
+});
+
+test('printed menu plus requested water contains 113 unique products in 14 categories and valid local images', () => {
+  assert.equal(initialProducts.length, 113);
   assert.equal(Object.keys(menuPhotos).length, 71);
   for (const slug of [
     'italian-red-pasta',
@@ -37,8 +60,8 @@ test('printed menu contains 111 unique products in 14 categories and valid local
     );
   }
   assert.equal(initialCategories.length, 14);
-  assert.equal(new Set(initialProducts.map((product) => product.id)).size, 111);
-  assert.equal(new Set(initialProducts.map((product) => product.slug)).size, 111);
+  assert.equal(new Set(initialProducts.map((product) => product.id)).size, 113);
+  assert.equal(new Set(initialProducts.map((product) => product.slug)).size, 113);
   for (const product of initialProducts) {
     assert.ok(productSchema.safeParse(product).success, product.name);
     assert.ok(initialCategories.some((category) => category.id === product.categoryId));
@@ -203,7 +226,7 @@ test('menu migration keeps receipts, carts, sessions, custom products and busine
     migrated.products?.find((product) => product.id === 'custom-pizza')?.archived,
     undefined,
   );
-  assert.equal(migrated.products?.filter((product) => !product.archived).length, 112);
+  assert.equal(migrated.products?.filter((product) => !product.archived).length, 114);
   assert.equal(
     migrated.categories?.find((category) => category.id === 'custom-category')?.archived,
     false,

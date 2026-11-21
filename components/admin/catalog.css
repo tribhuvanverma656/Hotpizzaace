@@ -13,7 +13,7 @@
   background: #f6f7f1;
   border: 1px solid #e6e9df;
   border-radius: 7px;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   color: #68715d;
 }
@@ -23,7 +23,7 @@
   background: #eaf0e1;
 }
 .admin-product-views button span {
-  font-size: 10px;
+  font-size: 12px;
   padding: 2px 5px;
   border-radius: 4px;
   background: #ffffffb3;
@@ -32,7 +32,7 @@
   margin: 16px 20px 0;
   color: #778269;
   line-height: 1.6;
-  font-size: 11px;
+  font-size: 12px;
 }
 .admin-product-action.admin-icon-link {
   width: auto;
@@ -40,7 +40,7 @@
   height: auto;
   padding: 7px 9px;
   gap: 5px;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
 }
 .admin-product-delete.admin-icon-link {
@@ -56,7 +56,7 @@
   min-height: 36px;
   padding: 7px 9px;
   gap: 5px;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
 }
 .admin-categories-card .admin-category-name strong,
@@ -104,12 +104,12 @@
   .admin-product-views button {
     flex: 1;
     padding: 10px 8px;
-    font-size: 10px;
+    font-size: 12px;
     gap: 5px;
   }
   .admin-deleted-note {
     margin-inline: 13px;
-    font-size: 10px;
+    font-size: 12px;
   }
   .admin-product-action.admin-icon-link {
     padding: 7px;

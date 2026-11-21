@@ -8,4 +8,21 @@ test-results/
 *.log
 coverage/
 .vercel/
-.idea/
+supabase/.temp/
+
+# Generated code-graph output (local tool)
+graphify-out/
+Claude outputs/
+
+# Private local data and signing material
+*.db
+*.db-*
+*.sqlite
+*.sqlite3
+*.dump
+*.pem
+*.key
+*.p12
+*.mobileprovision
+*.keystore
+*.jks

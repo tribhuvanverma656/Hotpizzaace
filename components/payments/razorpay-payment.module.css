@@ -1,0 +1,55 @@
+.card {
+  width: 100%;
+  padding: 22px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--paper);
+}
+.heading {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.heading > svg {
+  flex-shrink: 0;
+  color: #487142;
+}
+.heading strong {
+  display: block;
+  font-size: 16px;
+}
+.heading p,
+.message {
+  margin: 7px 0 0;
+  font-size: 14px;
+  line-height: 1.7;
+  color: #686859;
+}
+.message {
+  padding-top: 9px;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 18px 0;
+}
+.actions button {
+  min-height: 48px;
+  white-space: normal;
+}
+.card > small {
+  display: block;
+  margin-top: 14px;
+  font-size: 12px;
+  line-height: 1.7;
+  color: #777669;
+}
+@media (max-width: 500px) {
+  .card {
+    padding: 18px;
+  }
+  .actions button {
+    width: 100%;
+  }
+}

@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
-import { Check, Minus, Plus, ShoppingBag, Flame } from 'lucide-react';
+import { ProductImage } from './product-image';
+import { Check, Minus, Plus, ShoppingBag, Star } from 'lucide-react';
 import { toast } from 'sonner';
 import { Product } from '@/types';
 import { useDemoStore } from '@/lib/store';
@@ -37,13 +38,18 @@ export function ProductCustomizer({
   return (
     <div className="customizer">
       <div className="customizer-photo">
-        <img src={product.image} alt={product.name} />
+        <ProductImage
+          src={product.image}
+          alt={product.name}
+          sizes="(max-width: 700px) 100vw, 560px"
+          priority
+        />
         <span className={`diet-mark ${product.vegetarian ? 'veg' : 'nonveg'}`}>
           <i />
         </span>
         {product.bestseller && (
           <span className="photo-tag">
-            <Flame size={12} /> CROWD FAVOURITE
+            <Star size={12} /> POPULAR CHOICE
           </span>
         )}
       </div>

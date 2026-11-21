@@ -12,6 +12,7 @@ import {
   getCartTotals,
   getUnitPrice,
   isRevenueEligible,
+  isSimulatedRevenueEligible,
   validateSelection,
 } from '../lib/pricing';
 import { STORE_VERSION } from '../lib/persistence';
@@ -73,6 +74,8 @@ test('sizes replace the base price; crust and extras add integer paise', () => {
     subtotal: 49800,
     deliveryFee: 4900,
     discount: 0,
+    roundOff: 0,
+    roundOffPolicy: 'nearest_rupee',
     total: 54700,
   });
   assert.equal(getCartTotals([item], initialProducts, initialSettings, '', 'pickup').total, 49800);
@@ -248,7 +251,9 @@ test('delivery and pickup orders follow their own valid fulfillment paths', () =
   ] as const)
     useDemoStore.getState().updateOrderStatus(order.id, status);
   assert.equal(
-    isRevenueEligible(useDemoStore.getState().orders.find((item) => item.id === order.id)!),
+    isSimulatedRevenueEligible(
+      useDemoStore.getState().orders.find((item) => item.id === order.id)!,
+    ),
     true,
   );
   assert.deepEqual(getAllowedOrderStatuses({ status: 'ready', fulfillment: 'pickup' }), [
@@ -263,7 +268,9 @@ test('failed, unpaid and cancelled orders are excluded from completed revenue', 
   const complete = {
     ...initialOrders[0],
     status: 'delivered',
-    paymentStatus: 'simulated_paid',
+    paymentStatus: 'paid',
+    paymentMode: 'razorpay_live',
+    paymentMethod: 'upi',
   } as Order;
   assert.equal(isRevenueEligible(complete), true);
   assert.equal(isRevenueEligible({ ...complete, paymentStatus: 'failed' }), false);

@@ -4,7 +4,8 @@ import { ArrowRight } from 'lucide-react';
 import type { Order } from '@/types';
 import { getTrackingStatus, trackingHref } from '@/lib/order-tracking';
 import { money } from '@/lib/utils';
-export function LocalOrderList({ orders }: { orders: Order[] }) {
+import { orderTrackingHref } from '@/lib/commerce/client';
+export function LocalOrderList({ orders, shared = false }: { orders: Order[]; shared?: boolean }) {
   return (
     <div className="history-grid">
       {orders.map((order) => (
@@ -20,12 +21,16 @@ export function LocalOrderList({ orders }: { orders: Order[] }) {
           <h3>{order.items.map((item) => `${item.quantity} × ${item.name}`).join(', ')}</h3>
           <div>
             <b>{money(order.total)}</b>
-            <Link href={trackingHref(order)} className="text-link">
+            <Link
+              href={shared ? orderTrackingHref(order) : trackingHref(order)}
+              className="text-link"
+            >
               Track order <ArrowRight size={16} />
             </Link>
           </div>
           <small>
-            Payment: {order.paymentStatus.replaceAll('_', ' ')} · Demo order on this device
+            Payment: {order.paymentStatus.replaceAll('_', ' ')} ·{' '}
+            {shared ? 'Saved with the restaurant' : 'Demo order on this device'}
           </small>
         </article>
       ))}

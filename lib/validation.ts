@@ -136,8 +136,30 @@ export const productSchema = z
     crusts: optionList,
     toppings: optionList,
     badge: z.string().trim().max(40).optional(),
+    gstInclusive: z
+      .object({
+        rateBps: z
+          .number()
+          .int()
+          .min(1)
+          .max(4000)
+          .refine(
+            (value) => value % 2 === 0,
+            'Use an even GST rate in basis points so CGST and SGST can be split equally.',
+          ),
+        code: z.string().regex(/^(?:\d{4}|\d{6}|\d{8})$/, 'Enter a 4, 6 or 8 digit HSN/SAC code.'),
+      })
+      .strict()
+      .optional(),
   })
   .superRefine((product, context) => {
+    if (product.gstInclusive && (product.crusts.length || product.toppings.length))
+      context.addIssue({
+        code: 'custom',
+        path: ['gstInclusive'],
+        message:
+          'GST-inclusive products cannot have crust or topping add-ons. Use size variants for each MRP.',
+      });
     for (const group of ['crusts', 'toppings'] as const) {
       product[group].forEach((option, index) => {
         if (
@@ -164,6 +186,21 @@ export const categorySchema = z.object({
 
 export const settingsSchema = z
   .object({
+    billing: z
+      .object({
+        businessName: z.string().trim().min(2).max(100),
+        address: z.string().trim().min(8).max(300),
+        gstin: z.string().regex(/^09[A-Z]{5}\d{4}[A-Z][A-Z\d]Z[A-Z\d]$/),
+        fssaiNumber: z.string().regex(/^\d{14}$/),
+        stateName: z.literal('Uttar Pradesh'),
+        stateCode: z.literal('09'),
+        sac: z.literal('996331'),
+        cgstRate: z.literal(2.5),
+        sgstRate: z.literal(2.5),
+      })
+      .strict()
+      .optional(),
+    counterAcceptingOrders: z.boolean().optional(),
     name: z.string().trim().min(2).max(100),
     address: z.string().trim().min(8).max(300),
     phone: phoneSchema,
@@ -179,10 +216,7 @@ export const settingsSchema = z
       .array(z.string().regex(/^\d{6}$/, 'Service postal codes must contain 6 digits.'))
       .max(100),
     preparationMinutes: z.number().int().min(5).max(240),
-    paymentMethods: z
-      .array(z.enum(['upi', 'card', 'cash']))
-      .min(1)
-      .max(3),
+    paymentMethods: z.array(z.enum(['upi', 'card', 'cash'])).max(3),
     couponCode: z
       .string()
       .trim()
@@ -196,6 +230,12 @@ export const settingsSchema = z
     couponMaximum: moneySchema,
   })
   .superRefine((settings, context) => {
+    if (settings.acceptingOrders && settings.paymentMethods.length === 0)
+      context.addIssue({
+        code: 'custom',
+        path: ['paymentMethods'],
+        message: 'Choose at least one website payment method before accepting orders.',
+      });
     if (settings.deliveryEnabled && settings.servicePostalCodes.length === 0)
       context.addIssue({
         code: 'custom',

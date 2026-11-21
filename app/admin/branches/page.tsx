@@ -6,7 +6,7 @@ import { MapPin, Phone, Plus, Save, Settings2, Store, Pencil, X } from 'lucide-r
 import { toast } from 'sonner';
 import { PageHeading } from '@/components/admin/shared';
 import { initialSettings } from '@/lib/data';
-import { useDemoStore } from '@/lib/store';
+import { useAdminStore } from '@/components/admin/use-admin-store';
 import type { Branch } from '@/types';
 import styles from '@/components/admin/admin-branches.module.css';
 
@@ -38,7 +38,9 @@ function kitchenLabel(branch: Branch) {
 
 export default function BranchesPage() {
   const router = useRouter();
-  const { branches, adminBranchId, selectAdminBranch, saveBranch } = useDemoStore();
+  const { branches, adminBranchId, selectAdminBranch, saveBranch, shared, saving } =
+    useAdminStore();
+  const [originalRevision, setOriginalRevision] = useState(shared.revision);
   const [formOpen, setFormOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [draft, setDraft] = useState<BranchDraft>(freshDraft);
@@ -47,6 +49,7 @@ export default function BranchesPage() {
   const set = (field: keyof BranchDraft, value: string) =>
     setDraft((previous) => ({ ...previous, [field]: value }));
   const openForm = (branch?: Branch) => {
+    setOriginalRevision(shared.revision);
     setEditingId(branch?.id ?? null);
     setDraft(
       branch
@@ -182,7 +185,7 @@ export default function BranchesPage() {
           </div>
           <form
             className={styles.form}
-            onSubmit={(event) => {
+            onSubmit={async (event) => {
               event.preventDefault();
               setError('');
               try {
@@ -231,7 +234,7 @@ export default function BranchesPage() {
                     servicePostalCodes: codes,
                   },
                 };
-                saveBranch(branch);
+                await saveBranch(branch, originalRevision);
                 toast.success(
                   existing
                     ? 'Branch updated'
@@ -315,7 +318,7 @@ export default function BranchesPage() {
               </p>
             )}
             <div className={styles.actions}>
-              <button className="btn btn-primary" type="submit">
+              <button className="btn btn-primary" type="submit" disabled={saving}>
                 <Save size={16} />
                 {editingId ? 'Save branch' : 'Create branch'}
               </button>

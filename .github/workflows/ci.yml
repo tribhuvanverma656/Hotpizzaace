@@ -38,10 +38,16 @@ jobs:
       - name: Install locked dependencies
         run: npm ci
 
+      - name: Audit production dependencies
+        run: npm audit --omit=dev --audit-level=high
+
       - name: Lint
         run: npm run lint
 
       - name: Run regression tests
+        env:
+          APP_BASE_URL: https://hotpizzaace.com
+          RENDER_EXTERNAL_URL: https://hotpizzaace-eqcy.onrender.com
         run: npm test
 
       - name: Build production website

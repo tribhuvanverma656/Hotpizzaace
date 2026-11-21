@@ -30,7 +30,7 @@
   height: 24px;
   border: 1px solid var(--line);
   border-radius: 50%;
-  font-size: 11px;
+  font-size: 12px;
 }
 .checkout-progress [aria-current='step'] {
   color: var(--ink);
@@ -116,7 +116,7 @@
   background: #f7f3eb;
 }
 .checkout-experience .signed-in-phone-note {
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.5;
 }
 .checkout-optional {
@@ -132,7 +132,7 @@
 .checkout-optional summary > span {
   margin-left: 8px;
   color: var(--muted);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 400;
 }
 .checkout-optional-fields {
@@ -198,7 +198,7 @@
 .checkout-address-review .btn {
   min-height: 40px;
   padding: 10px 13px;
-  font-size: 11px;
+  font-size: 12px;
 }
 .checkout-experience .checkout-address-coverage {
   margin-top: 18px;
@@ -247,7 +247,7 @@
   font-size: 14px;
 }
 .checkout-experience .payment-methods small {
-  font-size: 11px;
+  font-size: 12px;
 }
 .checkout-experience .minimum-note,
 .checkout-experience .checkout-terms {
@@ -303,7 +303,7 @@
     font-size: 14px;
   }
   .checkout-experience .fulfillment-options span {
-    font-size: 11px;
+    font-size: 12px;
   }
   .checkout-experience .payment-methods > label {
     flex-wrap: wrap;
@@ -350,14 +350,14 @@
   }
   .checkout-mobile-total > span {
     color: var(--muted);
-    font-size: 11px;
+    font-size: 12px;
   }
   .checkout-mobile-total strong {
     font-size: 23px;
     line-height: 1.15;
   }
   .checkout-mobile-total small {
-    font-size: 10px;
+    font-size: 12px;
     line-height: 1.4;
     color: var(--muted);
   }

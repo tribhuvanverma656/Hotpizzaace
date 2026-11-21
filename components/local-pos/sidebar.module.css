@@ -1,0 +1,102 @@
+.sidebar {
+  position: sticky;
+  top: 16px;
+  align-self: start;
+  min-height: 390px;
+  padding: 14px 10px;
+  border: 1px solid #e8e4dc;
+  border-radius: 11px;
+  background: #fff;
+}
+
+.label {
+  margin: 3px 9px 12px;
+  color: #a19c92;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .12em;
+}
+
+.sidebar nav {
+  display: grid;
+  gap: 4px;
+}
+
+.sidebar nav a,
+.teamLink {
+  min-height: 41px;
+  padding: 0 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-radius: 7px;
+  color: #706c63;
+  font-size: 11px;
+  text-decoration: none;
+  transition: background .15s, color .15s;
+}
+
+.sidebar nav a:hover,
+.teamLink:hover {
+  background: #f7f5f0;
+  color: #99432e;
+}
+
+.sidebar nav a.active {
+  background: #faeee9;
+  color: #9c452f;
+  font-weight: 700;
+}
+
+.sidebar nav a.active::before {
+  width: 3px;
+  height: 21px;
+  margin-left: -10px;
+  border-radius: 0 3px 3px 0;
+  background: #a5432d;
+  content: '';
+}
+
+.sidebar nav a.active svg {
+  margin-left: -3px;
+}
+
+.teamLink {
+  margin-top: 20px;
+  padding-top: 13px;
+  border-top: 1px solid #efede8;
+  border-radius: 0;
+}
+
+@media (max-width: 760px) {
+  .sidebar {
+    position: static;
+    min-height: auto;
+    padding: 8px;
+  }
+
+  .label,
+  .teamLink {
+    display: none;
+  }
+
+  .sidebar nav {
+    display: flex;
+    gap: 5px;
+    overflow-x: auto;
+  }
+
+  .sidebar nav a {
+    min-height: 37px;
+    flex: 0 0 auto;
+    padding: 0 10px;
+  }
+
+  .sidebar nav a.active::before {
+    display: none;
+  }
+
+  .sidebar nav a.active svg {
+    margin-left: 0;
+  }
+}

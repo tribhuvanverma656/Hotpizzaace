@@ -1,5 +1,6 @@
 'use client';
 import { SocialLinks } from '@/components/social-links';
+import { BusinessRegistrations } from '@/components/business-identity';
 
 import { Clock, MapPin, Phone, ArrowUpRight } from 'lucide-react';
 import { useDemoStore } from '@/lib/store';
@@ -41,6 +42,7 @@ export function BusinessContact() {
           <dd>{settings.openingHours}</dd>
         </div>
       </dl>
+      <BusinessRegistrations branchId={selectedBranchId} />
       <div className={styles.contactActions}>
         <a href={`tel:${telephone}`}>Call restaurant</a>
         <a href={restaurantMap} target="_blank" rel="noopener noreferrer">
@@ -83,7 +85,7 @@ export function OrderingFacts() {
         <dd>No minimum order value and no delivery charge</dd>
       </div>
       <div>
-        <dt>Demo delivery postal codes</dt>
+        <dt>Configured delivery postal codes</dt>
         <dd>{settings.servicePostalCodes.join(', ') || 'No delivery area configured'}</dd>
       </div>
       <div>
@@ -112,11 +114,11 @@ export function PaymentPolicy() {
   return (
     <p>
       {methods.length
-        ? `The methods currently enabled in this demo are ${methods.map((method) => labels[method]).join(', ')}.`
+        ? `The methods currently enabled in this development checkout are ${methods.map((method) => labels[method]).join(', ')}.`
         : 'No payment methods are currently enabled, so checkout is unavailable.'}{' '}
       Online payments are simulations. Cash on delivery or pickup only appears when enabled by the
       restaurant in the dashboard. No payment is collected and no cash delivery is scheduled by this
-      prototype.
+      development website. Live restaurant ordering remains paused while development continues.
     </p>
   );
 }
@@ -127,8 +129,8 @@ export function CouponPolicy() {
     <p>
       {isCouponActive(settings) ? (
         <>
-          The current demo code is <strong>{settings.couponCode}</strong>: {settings.couponPercent}%
-          off a food subtotal of {money(settings.couponMinimum)} or more, up to{' '}
+          The current code is <strong>{settings.couponCode}</strong>: {settings.couponPercent}% off
+          a food subtotal of {money(settings.couponMinimum)} or more, up to{' '}
           {money(settings.couponMaximum)} off.
         </>
       ) : (

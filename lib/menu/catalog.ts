@@ -375,6 +375,21 @@ const beverages = dishes('beverages', [
   ['Green Apple Mojito', 75, 'Green apple mojito.'],
 ]);
 
+// Owner-requested price choices. Brand and bottle volume were not supplied.
+// Plain packaged water: HSN 2201, Schedule I of Notification 9/2025-CT(R).
+export const mrpWaterProducts: Product[] = [10, 20].map((price) => ({
+  ...dishes('beverages', [
+    [
+      `Water Bottle ₹${price}`,
+      price,
+      'Plain packaged drinking water. Price includes applicable GST.',
+    ],
+  ])[0],
+  id: `hpa-water-bottle-${price}`,
+  slug: `water-bottle-${price}`,
+  gstInclusive: { rateBps: 500, code: '2201' },
+}));
+
 /** Names and prices from both user-supplied sheets; overlapping prices use the maximum. */
 export const menuProducts: Product[] = (
   [
@@ -392,6 +407,7 @@ export const menuProducts: Product[] = (
     ...desserts,
     ...dips,
     ...beverages,
+    ...mrpWaterProducts,
   ] satisfies Product[]
 ).map((product) => ({
   ...product,

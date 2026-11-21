@@ -1,4 +1,5 @@
 'use client';
+import { gatewayLabels } from '@/lib/payments/method';
 import { Check, ChevronDown, Info, Tag, Truck, X } from 'lucide-react';
 import { useId, useState } from 'react';
 import { toast } from 'sonner';
@@ -6,7 +7,9 @@ import { useDemoStore } from '@/lib/store';
 import { getCartTotals, isCouponActive } from '@/lib/pricing';
 import { money } from '@/lib/utils';
 import { Fulfillment } from '@/types';
+import { useSharedCommerce } from './shared-commerce-provider';
 import './order-summary-ux.css';
+import { GstBreakup } from './order-bill';
 export function OrderSummary({
   fulfillment = 'delivery',
   children,
@@ -14,12 +17,18 @@ export function OrderSummary({
   fulfillment?: Fulfillment;
   children?: React.ReactNode;
 }) {
+  const shared = useSharedCommerce();
   const { cart, products, settings, coupon, applyCoupon, clearCoupon } = useDemoStore();
   const [code, setCode] = useState('');
   const [couponError, setCouponError] = useState('');
   const couponFieldId = useId();
   const itemCount = cart.reduce((count, item) => count + item.quantity, 0);
-  let totals = { subtotal: 0, deliveryFee: 0, discount: 0, total: 0 };
+  let totals: ReturnType<typeof getCartTotals> = {
+    subtotal: 0,
+    deliveryFee: 0,
+    discount: 0,
+    total: 0,
+  };
   let error = '';
   try {
     totals = getCartTotals(cart, products, settings, coupon, fulfillment);
@@ -59,7 +68,7 @@ export function OrderSummary({
       ) : (
         <>
           <div className="summary-row">
-            <span>Food subtotal</span>
+            <span>Items subtotal</span>
             <b>{money(totals.subtotal)}</b>
           </div>
           <div className="summary-row">
@@ -76,6 +85,20 @@ export function OrderSummary({
             <div className="summary-row green-text">
               <span>Coupon savings</span>
               <b>−{money(totals.discount)}</b>
+            </div>
+          )}
+          <GstBreakup tax={totals.tax} />
+          {totals.tax && (
+            <p className="muted">
+              {totals.tax.version === 2
+                ? 'GST within MRP is already included. Only the additional GST shown above is added to your bill.'
+                : 'Menu prices exclude GST. Tax applies after discounts, including the restaurant’s delivery charge.'}
+            </p>
+          )}
+          {totals.roundOff !== undefined && totals.roundOff !== 0 && (
+            <div className="summary-row">
+              <span>Round off</span>
+              <b>{`${totals.roundOff > 0 ? '+' : ''}${money(totals.roundOff)}`}</b>
             </div>
           )}
           <div className="summary-total">
@@ -190,7 +213,15 @@ export function OrderSummary({
       {children}
       <div className="summary-disclosure">
         <Info size={14} />
-        <span>Demo checkout · no payment is collected.</span>
+        <span>
+          {shared.onlinePayment
+            ? shared.onlinePayment.mode === 'test'
+              ? `${gatewayLabels[shared.onlinePayment.provider]} test checkout · no real money charged.`
+              : `Online payments use ${gatewayLabels[shared.onlinePayment.provider]}’s secure checkout.`
+            : !shared.enabled || shared.allowSimulatedPayments
+              ? 'Demo checkout · no payment is collected.'
+              : 'Online payment is currently unavailable.'}
+        </span>
       </div>
     </aside>
   );

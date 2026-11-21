@@ -1,0 +1,126 @@
+.identity {
+  margin: 22px 0;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--paper);
+  color: #49483f;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.operator > strong {
+  display: block;
+  margin-bottom: 5px;
+  color: inherit;
+  font-size: 13px;
+  letter-spacing: 0.4px;
+}
+
+.operator address {
+  max-width: 600px;
+  font-style: normal;
+  overflow-wrap: anywhere;
+}
+
+.operator address > span {
+  display: block;
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.registrations {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 32px;
+  margin: 18px 0 0;
+  padding-top: 15px;
+  border-top: 1px solid var(--line);
+  color: inherit;
+}
+
+.registrations > div {
+  min-width: 0;
+}
+
+.registrations dt {
+  font-size: 12px;
+  line-height: 1.5;
+  opacity: 0.85;
+}
+
+.registrations dd {
+  margin: 3px 0 0;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: start;
+  gap: 20px 40px;
+  margin: 0 0 24px;
+  border-color: #ffffff24;
+  background: transparent;
+  color: #d9dccf;
+  font-size: 12px;
+}
+
+.footer .operator {
+  flex: 1 1 280px;
+}
+
+.footer .registrations {
+  flex: 1 1 280px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.grievance {
+  margin: 20px 0;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--paper);
+}
+
+.contactRole {
+  display: block;
+  margin-bottom: 9px;
+  font-size: 14px;
+}
+
+.grievance address {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  gap: 5px;
+  font-style: normal;
+  font-size: 14px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+.grievance a {
+  max-width: 100%;
+}
+
+@media (max-width: 500px) {
+  .identity,
+  .grievance {
+    padding: 16px;
+  }
+
+  .footer {
+    gap: 18px;
+  }
+
+  .registrations {
+    column-gap: 24px;
+  }
+}

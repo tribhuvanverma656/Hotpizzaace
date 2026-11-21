@@ -1,3 +1,4 @@
+import { isGatewayMode } from './payments/method';
 import type { Customer, Fulfillment, Order, SavedAddress } from '../types';
 import { normalizeCustomerPhone } from './customer-auth';
 import { parseCustomerAddress } from './customer-addresses';
@@ -263,7 +264,14 @@ export function clearMatchingGuestCheckoutDraft(
 }
 
 export function isCompletedCheckout(
-  order: Pick<Order, 'paymentMethod' | 'paymentStatus'>,
+  order: Pick<Order, 'paymentMethod' | 'paymentStatus' | 'paymentMode'>,
 ): boolean {
-  return order.paymentMethod === 'cash' || order.paymentStatus === 'simulated_paid';
+  // This is checkout finality, not permission to fulfill: even a captured payment
+  // needing restaurant review must not leave the checkout open for another payment.
+  return (
+    order.paymentMethod === 'cash' ||
+    (order.paymentStatus === 'paid' && isGatewayMode(order.paymentMode)) ||
+    (order.paymentStatus === 'simulated_paid' &&
+      (order.paymentMode === undefined || order.paymentMode === 'simulation'))
+  );
 }

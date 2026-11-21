@@ -1,31 +1,28 @@
-# Render Blueprint Specification for Hot Pizza Ace
-# Documentation: https://render.com/docs/blueprint-spec
-
+# Development preview only. Shared orders require the separately deployed Supabase migration/function.
 services:
   - type: web
-    name: hot-pizza-ace
-    env: node
+    name: hotpizzaace-development
+    runtime: node
     plan: free
-    region: singapore # Closest low-latency region to India
-    buildCommand: npm install && npm run build
+    region: singapore
+    repo: https://github.com/Satya2n/hotpizzaace
+    branch: staging
+    buildCommand: npm ci --include=dev && npm run lint && npm test && npm run build && npm run typecheck
     startCommand: npm start
-    autoDeploy: true
+    autoDeployTrigger: checksPass
+    healthCheckPath: /api/liveness
     envVars:
       - key: NODE_VERSION
-        value: 20.18.0
+        value: 24.20.0
+      - key: NEXT_TELEMETRY_DISABLED
+        value: '1'
+      - key: COMMERCE_ENABLED
+        value: 'true'
       - key: NEXT_PUBLIC_SUPABASE_URL
         sync: false
-      - key: NEXT_PUBLIC_SUPABASE_ANON_KEY
+      - key: NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
         sync: false
-      - key: SUPABASE_SERVICE_ROLE_KEY
+      - key: NEXT_PUBLIC_COUNTER_UPI_ID
         sync: false
-      - key: NEXT_PUBLIC_RAZORPAY_KEY_ID
-        sync: false
-      - key: RAZORPAY_KEY_ID
-        sync: false
-      - key: RAZORPAY_KEY_SECRET
-        sync: false
-      - key: RAZORPAY_WEBHOOK_SECRET
-        sync: false
-      - key: NEXT_PUBLIC_APP_URL
+      - key: NEXT_PUBLIC_COUNTER_UPI_NAME
         sync: false

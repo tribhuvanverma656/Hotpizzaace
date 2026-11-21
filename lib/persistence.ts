@@ -1,8 +1,9 @@
 import { initialBranches, initialSettings } from './data';
 import { migrateMenuState } from './menu/migrate';
+import { mrpWaterProducts } from './menu/catalog';
 
 // Versions 1–4 imported the catalogue; 5 added a threshold; 6 applies the confirmed fee.
-export const STORE_VERSION = 8;
+export const STORE_VERSION = 9;
 
 export function migrateDemoState(value: unknown, version: number) {
   let state = migrateMenuState(value, version);
@@ -39,6 +40,22 @@ export function migrateDemoState(value: unknown, version: number) {
     state = {
       ...state,
       savedAddresses: Array.isArray(state.savedAddresses) ? state.savedAddresses : [],
+    };
+  }
+  if (version < 9 && Array.isArray(state.products)) {
+    const products = state.products;
+    state = {
+      ...state,
+      // Add the requested items once; never overwrite an owner's existing edits.
+      products: [
+        ...products,
+        ...structuredClone(
+          mrpWaterProducts.filter(
+            (item) =>
+              !products.some((product) => product.id === item.id || product.slug === item.slug),
+          ),
+        ),
+      ],
     };
   }
   return state;

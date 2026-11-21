@@ -1,0 +1,224 @@
+.section {
+  margin-bottom: 24px;
+}
+.heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: start;
+  gap: 16px;
+}
+.heading > div {
+  flex: 1;
+  min-width: min(280px, 100%);
+}
+.heading h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.heading p {
+  color: #6d7467;
+  font-size: 13px;
+  line-height: 1.7;
+  margin: 8px 0 0;
+}
+.intro {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+.intro p {
+  flex: 1;
+  min-width: min(260px, 100%);
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.7;
+  color: #697460;
+}
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 310px), 1fr));
+  gap: 15px;
+}
+.list > li {
+  border: 1px solid #dde4d5;
+  border-radius: 11px;
+  padding: 17px;
+  min-width: 0;
+}
+.member {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.member > div {
+  display: grid;
+  gap: 5px;
+}
+.member strong {
+  font-size: 16px;
+  overflow-wrap: anywhere;
+}
+.member div > span {
+  font-size: 13px;
+  color: #718066;
+  overflow-wrap: anywhere;
+}
+.enabled,
+.disabled {
+  border-radius: 5px;
+  padding: 5px 8px;
+  font-size: 12px;
+  font-weight: 750;
+}
+.enabled {
+  color: #355f2d;
+  background: #edf5e7;
+}
+.disabled {
+  color: #875f2a;
+  background: #fff3db;
+}
+.list p {
+  margin: 13px 0 0;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+.list p small {
+  color: #77816e;
+}
+.list .lastLogin {
+  color: #77816e;
+  font-size: 12px;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 16px;
+}
+.actions :global(.btn) {
+  min-height: 38px;
+}
+.form {
+  margin-top: 22px;
+  padding-top: 22px;
+  border-top: 1px solid #dce3d3;
+}
+.formHeading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.formHeading h3 {
+  margin: 0;
+  font-size: 19px;
+}
+.form fieldset {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  display: grid;
+  gap: 18px;
+  min-width: 0;
+}
+.form label {
+  display: grid;
+  gap: 7px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #46583b;
+}
+.form input,
+.form select {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid #cbd6c1;
+  border-radius: 8px;
+  padding: 11px 12px;
+  color: #283722;
+  background: #fff;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 400;
+}
+.form input:focus-visible,
+.form select:focus-visible {
+  outline: 2px solid #547943;
+  outline-offset: 2px;
+}
+.form small {
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.6;
+  color: #74836a;
+}
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+.form fieldset > button {
+  justify-self: start;
+}
+.help {
+  color: #74836a;
+  font-size: 12px;
+  line-height: 1.7;
+  margin: 0;
+}
+.help svg {
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 5px;
+}
+.empty {
+  padding: 20px 0;
+  color: #74836a;
+  font-size: 14px;
+}
+.info,
+.error,
+.success {
+  padding: 13px 15px;
+  border: 1px solid;
+  border-radius: 9px;
+  font-size: 13px;
+  line-height: 1.7;
+}
+.info {
+  color: #6b653b;
+  background: #faf7e8;
+  border-color: #e0d8ae;
+}
+.info p {
+  margin: 5px 0 0;
+}
+.error {
+  color: #a44330;
+  background: #fff0e9;
+  border-color: #e0b9ab;
+}
+.success {
+  color: #3e6732;
+  background: #eef6e7;
+  border-color: #bfd5af;
+}
+@media (max-width: 600px) {
+  .formGrid {
+    grid-template-columns: 1fr;
+  }
+  .actions :global(.btn) {
+    flex: 1;
+  }
+}
